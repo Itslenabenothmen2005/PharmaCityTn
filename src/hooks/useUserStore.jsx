@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { mockMedicines } from '../data/medicines';
+import { mockRequests } from '../data/orders';
 
 const UserStoreContext = createContext(null);
 
@@ -104,7 +105,17 @@ export function UserStoreProvider({ children }) {
     }
   });
 
-  // Sauvegardes synchronisées
+  // Demandes de médicaments (Feature 8)
+  const [requests, setRequests] = useState(() => {
+    try {
+      const saved = localStorage.getItem('pharmacity_user_requests');
+      return saved ? JSON.parse(saved) : mockRequests;
+    } catch {
+      return mockRequests;
+    }
+  });
+
+  // Synchronisations localStorage
   useEffect(() => {
     try {
       localStorage.setItem('pharmacity_user_favorites', JSON.stringify(favoriteIds));
@@ -129,6 +140,12 @@ export function UserStoreProvider({ children }) {
     } catch {}
   }, [notifications]);
 
+  useEffect(() => {
+    try {
+      localStorage.setItem('pharmacity_user_requests', JSON.stringify(requests));
+    } catch {}
+  }, [requests]);
+
   // Actions Favoris
   const isFavorite = (id) => favoriteIds.includes(id);
 
@@ -147,7 +164,7 @@ export function UserStoreProvider({ children }) {
     const id = typeof medicineOrId === 'string' ? medicineOrId : medicineOrId.id;
     setRecentViewIds((prev) => {
       const filtered = prev.filter((item) => item !== id);
-      return [id, ...filtered].slice(0, 8); // Max 8 récents
+      return [id, ...filtered].slice(0, 8);
     });
   };
 
@@ -170,6 +187,78 @@ export function UserStoreProvider({ children }) {
   const deleteNotification = (id) => {
     setNotifications((prev) => prev.filter((n) => n.id !== id));
   };
+
+  // Actions Demandes (Feature 8)
+  const addRequest = (newRequestData) => {
+    const randomSuffix = Math.floor(1000 + Math.random() * 9000);
+    const newId = `DEM-TN-2026-${randomSuffix}`;
+    const now = new Date();
+    const formattedDate = `${String(now.getDate()).padStart(2, '0')}/${String(
+      now.getMonth() + 1
+    ).padStart(2, '0')}/2026 à ${String(now.getHours()).padStart(2, '0')}:${String(
+      now.getMinutes()
+    ).padStart(2, '0')}`;
+
+    const newRequest = {
+      ...newRequestData,
+      id: newId,
+      createdAt: formattedDate,
+      timestamp: Date.now(),
+      status: newRequestData.prescription?.required ? 'pending_verification' : 'pending_pharmacy',
+      statusLabel: newRequestData.prescription?.required
+        ? 'En attente de vérification'
+        : 'En attente de confirmation de la pharmacie',
+      statusDescription: newRequestData.prescription?.required
+        ? 'Ordonnance en cours d’examen par l’officine sélectionnée.'
+        : 'L’officine a reçu votre demande de mise à disposition.',
+      timeline: [
+        { step: 'Demande transmise', date: formattedDate, completed: true },
+        {
+          step: newRequestData.prescription?.required
+            ? 'Vérification ordonnance'
+            : 'Confirmation officine',
+          date: 'En cours',
+          completed: false,
+          current: true,
+        },
+        { step: 'Prête au comptoir', date: 'En attente', completed: false },
+        { step: 'Retrait par le bénéficiaire', date: 'En attente', completed: false },
+      ],
+      simulatedNotifications: {
+        applicant: {
+          title: `Demande ${newId} enregistrée`,
+          message: `Votre demande pour ${newRequestData.medicine?.name} a été transmise à ${newRequestData.pharmacy?.name}.`,
+          date: 'À l’instant',
+        },
+        beneficiary: {
+          title: `Notification bénéficiaire (${newRequestData.beneficiary?.name})`,
+          message: `M./Mme ${newRequestData.beneficiary?.name}, une mise de côté a été initiée en votre nom. Retrait personnel à la ${newRequestData.pharmacy?.name}.`,
+          date: 'À l’instant',
+          type: 'sms',
+        },
+      },
+    };
+
+    setRequests((prev) => [newRequest, ...prev]);
+
+    // Ajouter une notification in-app
+    const newNotif = {
+      id: `notif-${Date.now()}`,
+      medicineId: newRequestData.medicine?.id || 'med-1',
+      medicineName: newRequestData.medicine?.name || 'Médicament',
+      title: `Demande ${newId} créée`,
+      message: `Transmission confirmée auprès de ${newRequestData.pharmacy?.name}. Retrait prévu au comptoir.`,
+      date: 'À l’instant',
+      timestamp: Date.now(),
+      type: 'info',
+      read: false,
+    };
+    setNotifications((prev) => [newNotif, ...prev]);
+
+    return newRequest;
+  };
+
+  const getRequestById = (id) => requests.find((r) => r.id === id);
 
   // Objets complets résolus
   const favoriteMedicines = mockMedicines.filter((m) => favoriteIds.includes(m.id));
@@ -195,6 +284,9 @@ export function UserStoreProvider({ children }) {
         markAsRead,
         markAllAsRead,
         deleteNotification,
+        requests,
+        addRequest,
+        getRequestById,
       }}
     >
       {children}

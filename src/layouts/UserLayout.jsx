@@ -10,6 +10,8 @@ import {
   Menu,
   X,
   ShieldCheck,
+  FilePlus2,
+  ClipboardList,
 } from 'lucide-react';
 import Header from '../components/layout/Header';
 import Footer from '../components/layout/Footer';
@@ -19,6 +21,8 @@ import { useUserStore } from '../hooks/useUserStore';
 const userLinks = [
   { to: '/user/dashboard', label: 'Tableau de bord', icon: LayoutDashboard },
   { to: '/user/search', label: 'Recherche médicaments', icon: Search },
+  { to: '/user/request', label: 'Demander un médicament', icon: FilePlus2 },
+  { to: '/user/requests', label: 'Suivi des demandes', icon: ClipboardList, showRequestsCount: true },
   { to: '/user/favorites', label: 'Médicaments favoris', icon: Heart, showFavCount: true },
   { to: '/user/notifications', label: 'Alertes & Notifications', icon: Bell, showNotifCount: true },
   { to: '/user/profile', label: 'Mon Profil', icon: User },
@@ -29,10 +33,13 @@ const userLinks = [
  */
 export default function UserLayout() {
   const location = useLocation();
-  const { profile, favoriteIds, unreadCount } = useUserStore();
+  const { profile, favoriteIds, unreadCount, requests } = useUserStore();
   const [mobileDrawerOpen, setMobileDrawerOpen] = useState(false);
 
   const getInitial = (name) => (name ? name.charAt(0).toUpperCase() : 'A');
+  const activeRequestsCount = requests?.filter(
+    (r) => r.status === 'pending_verification' || r.status === 'pending_pharmacy' || r.status === 'confirmed'
+  ).length || 0;
 
   return (
     <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', backgroundColor: 'var(--color-bg)' }}>
@@ -172,7 +179,7 @@ export default function UserLayout() {
 
             {/* Menu Liens */}
             <nav style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
-              {userLinks.map(({ to, label, icon: Icon, showFavCount, showNotifCount }) => {
+              {userLinks.map(({ to, label, icon: Icon, showFavCount, showNotifCount, showRequestsCount }) => {
                 const active = location.pathname === to;
                 return (
                   <Link
@@ -202,6 +209,21 @@ export default function UserLayout() {
                       <Icon size={18} color={active ? 'var(--color-primary)' : 'currentColor'} />
                       <span>{label}</span>
                     </div>
+
+                    {showRequestsCount && activeRequestsCount > 0 && (
+                      <span
+                        style={{
+                          fontSize: '11px',
+                          fontWeight: 'bold',
+                          padding: '1px 7px',
+                          borderRadius: 'var(--radius-full)',
+                          backgroundColor: active ? 'var(--color-primary)' : 'var(--color-primary-light)',
+                          color: active ? 'var(--color-white)' : 'var(--color-primary-dark)',
+                        }}
+                      >
+                        {activeRequestsCount}
+                      </span>
+                    )}
 
                     {showFavCount && favoriteIds.length > 0 && (
                       <span
@@ -253,7 +275,7 @@ export default function UserLayout() {
                 <ShieldCheck size={14} color="var(--color-primary)" />
                 <strong>Réseau PharmaCityTN</strong>
               </div>
-              Les disponibilités sont déclaratives et ne garantissent pas la délivrance.
+              Retrait personnel obligatoire au comptoir. Aucune livraison à domicile.
             </div>
 
             {/* Lien retour portail public */}

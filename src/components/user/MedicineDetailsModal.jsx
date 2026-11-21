@@ -1,4 +1,5 @@
 import React from 'react';
+import { useNavigate } from 'react-router-dom';
 import {
   Pill,
   Heart,
@@ -11,6 +12,7 @@ import {
   FileText,
   BadgeAlert,
   Info,
+  ArrowRight,
 } from 'lucide-react';
 import Modal from '../common/Modal';
 import Button from '../common/Button';
@@ -22,6 +24,7 @@ import { useToast } from '../../hooks/useToast';
  * Modale complète de détails d'un médicament et des officines déclarantes
  */
 export default function MedicineDetailsModal({ isOpen, onClose, medicine }) {
+  const navigate = useNavigate();
   const { isFavorite, toggleFavorite } = useUserStore();
   const toast = useToast();
 
@@ -41,6 +44,14 @@ export default function MedicineDetailsModal({ isOpen, onClose, medicine }) {
   const handleCallPharmacy = (pharma) => {
     toast.info(`Appel vers ${pharma.name} (${pharma.phone})`, 'Contact Pharmacie');
     window.location.href = `tel:${pharma.phone.replace(/\s+/g, '')}`;
+  };
+
+  const handleStartRequest = (pharmacyId) => {
+    onClose();
+    const query = pharmacyId
+      ? `?medId=${medicine.id}&pharmacyId=${pharmacyId}`
+      : `?medId=${medicine.id}`;
+    navigate(`/user/request${query}`);
   };
 
   return (
@@ -72,7 +83,7 @@ export default function MedicineDetailsModal({ isOpen, onClose, medicine }) {
         </div>
       }
       footer={
-        <>
+        <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', alignItems: 'center', justifyContent: 'flex-end', width: '100%' }}>
           <Button variant="ghost" onClick={onClose}>
             Fermer
           </Button>
@@ -85,9 +96,16 @@ export default function MedicineDetailsModal({ isOpen, onClose, medicine }) {
               borderColor: favorite ? '#FCA5A5' : undefined,
             }}
           >
-            {favorite ? 'Retirer des favoris' : 'Ajouter aux favoris'}
+            {favorite ? 'Retirer des favoris' : 'Favoris'}
           </Button>
-        </>
+          <Button
+            variant="primary"
+            icon={FileText}
+            onClick={() => handleStartRequest()}
+          >
+            Faire une demande de retrait
+          </Button>
+        </div>
       }
     >
       <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
@@ -274,6 +292,8 @@ export default function MedicineDetailsModal({ isOpen, onClose, medicine }) {
                       borderTop: '1px solid var(--color-border-subtle)',
                       fontSize: '0.75rem',
                       color: 'var(--color-text-muted)',
+                      flexWrap: 'wrap',
+                      gap: '8px',
                     }}
                   >
                     <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
@@ -282,16 +302,21 @@ export default function MedicineDetailsModal({ isOpen, onClose, medicine }) {
                     </div>
 
                     <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                      <span style={{ fontWeight: '600', color: 'var(--color-text-secondary)' }}>
-                        {pharma.phone}
-                      </span>
                       <Button
-                        variant="primary"
+                        variant="ghost"
                         size="sm"
                         icon={PhoneCall}
                         onClick={() => handleCallPharmacy(pharma)}
                       >
-                        Appeler
+                        Appeler ({pharma.phone})
+                      </Button>
+                      <Button
+                        variant="secondary"
+                        size="sm"
+                        icon={FileText}
+                        onClick={() => handleStartRequest(pharma.id)}
+                      >
+                        Demander ici
                       </Button>
                     </div>
                   </div>

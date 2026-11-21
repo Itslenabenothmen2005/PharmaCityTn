@@ -12,6 +12,8 @@ import {
   Building2,
   Sparkles,
   Info,
+  ClipboardList,
+  Plus,
 } from 'lucide-react';
 import Card from '../../components/common/Card';
 import Badge from '../../components/common/Badge';
@@ -23,7 +25,7 @@ import { useUserStore } from '../../hooks/useUserStore';
 
 export default function UserDashboard() {
   const navigate = useNavigate();
-  const { profile, favoriteMedicines, recentMedicines, notifications, unreadCount } = useUserStore();
+  const { profile, favoriteMedicines, recentMedicines, notifications, unreadCount, requests } = useUserStore();
   const [selectedMedicine, setSelectedMedicine] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
 
@@ -166,22 +168,22 @@ export default function UserDashboard() {
           </div>
         </Card>
 
-        <Card padding="md" hoverable onClick={() => navigate('/user/search')}>
+        <Card padding="md" hoverable onClick={() => navigate('/user/requests')}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
             <div
               style={{
                 padding: '10px',
                 borderRadius: 'var(--radius-md)',
                 backgroundColor: 'var(--color-primary-light)',
-                color: 'var(--color-primary)',
+                color: 'var(--color-primary-dark)',
               }}
             >
-              <Clock size={20} />
+              <ClipboardList size={20} />
             </div>
             <div>
-              <div style={{ fontSize: '11px', color: 'var(--color-text-secondary)' }}>Consultés récemment</div>
+              <div style={{ fontSize: '11px', color: 'var(--color-text-secondary)' }}>Mes demandes de retrait</div>
               <strong style={{ fontSize: '20px', color: 'var(--color-text-primary)' }}>
-                {recentMedicines.length} références
+                {requests?.length || 0} {requests?.length > 1 ? 'dossiers' : 'dossier'}
               </strong>
             </div>
           </div>
@@ -309,7 +311,108 @@ export default function UserDashboard() {
       </div>
 
       {/* ======================================================================
-          6. NOTIFICATIONS RÉCENTES (APERÇU)
+          6. SUIVI DES DEMANDES DE RETRAIT RÉCENTES
+          ====================================================================== */}
+      <div>
+        <div
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            marginBottom: '14px',
+          }}
+        >
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <ClipboardList size={18} color="var(--color-primary)" />
+            <h2 style={{ fontSize: 'var(--font-size-lg)', margin: 0 }}>
+              Mes demandes de retrait en pharmacie
+            </h2>
+          </div>
+          <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
+            <Link
+              to="/user/request"
+              style={{
+                fontSize: 'var(--font-size-xs)',
+                fontWeight: '600',
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '4px',
+                color: 'var(--color-primary)',
+              }}
+            >
+              <Plus size={14} /> Nouvelle demande
+            </Link>
+            <Link
+              to="/user/requests"
+              style={{
+                fontSize: 'var(--font-size-xs)',
+                fontWeight: '600',
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '4px',
+              }}
+            >
+              Suivre mes demandes <ArrowRight size={14} />
+            </Link>
+          </div>
+        </div>
+
+        {requests && requests.length > 0 ? (
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '14px' }}>
+            {requests.slice(0, 2).map((req) => (
+              <Card key={req.id} padding="md" hoverable onClick={() => navigate('/user/requests')}>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                    <div>
+                      <span style={{ fontSize: '11px', color: 'var(--color-text-secondary)', fontWeight: 'bold' }}>
+                        {req.id}
+                      </span>
+                      <h4 style={{ margin: '2px 0 0', fontSize: 'var(--font-size-md)', color: 'var(--color-text-primary)' }}>
+                        {req.medicine?.name}
+                      </h4>
+                      <span style={{ fontSize: 'var(--font-size-xs)', color: 'var(--color-text-secondary)' }}>
+                        {req.medicine?.dosage} • {req.medicine?.form} (Qté : {req.quantity})
+                      </span>
+                    </div>
+                    {req.status === 'confirmed' ? (
+                      <Badge variant="success" dot size="sm">Prête pour retrait</Badge>
+                    ) : req.status === 'pending_pharmacy' ? (
+                      <Badge variant="info" dot size="sm">En attente pharmacie</Badge>
+                    ) : req.status === 'pending_verification' ? (
+                      <Badge variant="warning" dot size="sm">En vérification</Badge>
+                    ) : req.status === 'completed' ? (
+                      <Badge variant="neutral" size="sm">Retiré</Badge>
+                    ) : (
+                      <Badge variant="danger" size="sm">Refusé</Badge>
+                    )}
+                  </div>
+
+                  <div style={{ fontSize: 'var(--font-size-xs)', color: 'var(--color-text-secondary)', borderTop: '1px solid var(--color-border-subtle)', paddingTop: '8px' }}>
+                    <div><strong>Pharmacie :</strong> {req.pharmacy?.name} ({req.pharmacy?.city})</div>
+                    <div><strong>Bénéficiaire au comptoir :</strong> {req.beneficiary?.name} ({req.beneficiary?.phone})</div>
+                  </div>
+                </div>
+              </Card>
+            ))}
+          </div>
+        ) : (
+          <div
+            style={{
+              padding: '20px',
+              textAlign: 'center',
+              color: 'var(--color-text-secondary)',
+              backgroundColor: 'var(--color-bg-subtle)',
+              borderRadius: 'var(--radius-md)',
+              fontSize: 'var(--font-size-sm)',
+            }}
+          >
+            Aucune demande de médicament enregistrée pour l'instant.
+          </div>
+        )}
+      </div>
+
+      {/* ======================================================================
+          7. NOTIFICATIONS RÉCENTES (APERÇU)
           ====================================================================== */}
       <div>
         <div

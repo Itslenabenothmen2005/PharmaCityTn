@@ -17,6 +17,8 @@ import SearchPage from '../pages/user/SearchPage';
 import FavoritesPage from '../pages/user/FavoritesPage';
 import NotificationsPage from '../pages/user/NotificationsPage';
 import UserProfilePage from '../pages/user/UserProfilePage';
+import MedicineRequestPage from '../pages/user/MedicineRequestPage';
+import RequestsTrackingPage from '../pages/user/RequestsTrackingPage';
 
 // Pages pharmacie
 import PharmacyDashboard from '../pages/pharmacy/PharmacyDashboard';
@@ -47,6 +49,8 @@ const router = createBrowserRouter([
       { index: true, element: <Navigate to="dashboard" replace /> },
       { path: 'dashboard', element: <UserDashboard /> },
       { path: 'search', element: <SearchPage /> },
+      { path: 'request', element: <MedicineRequestPage /> },
+      { path: 'requests', element: <RequestsTrackingPage /> },
       { path: 'favorites', element: <FavoritesPage /> },
       { path: 'notifications', element: <NotificationsPage /> },
       { path: 'profile', element: <UserProfilePage /> },

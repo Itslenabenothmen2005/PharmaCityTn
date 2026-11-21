@@ -1,0 +1,268 @@
+/**
+ * Données initiales fictives pour la démonstration du parcours de demande de médicaments.
+ * Purement démonstratif côté frontend - Aucune transaction bancaire ou réservation réelle.
+ */
+export const mockRequests = [
+  {
+    id: 'DEM-TN-2026-0842',
+    createdAt: '21/11/2026 à 18:30',
+    timestamp: Date.now() - 3 * 3600 * 1000,
+    medicine: {
+      id: 'med-1',
+      name: 'Doliprane',
+      dosage: '1000 mg',
+      form: 'Comprimé effervescent',
+      price: '2.850 TND',
+      unitPrice: 2.85,
+      prescriptionRequired: false,
+    },
+    quantity: 2,
+    totalAmount: '5.700 TND',
+    pharmacy: {
+      id: 'ph-1',
+      name: 'Pharmacie El Manar',
+      address: 'Avenue Habib Bourguiba, El Manar II',
+      city: 'Tunis',
+      phone: '+216 71 885 920',
+    },
+    applicant: {
+      name: 'Ahmed Ben Salem',
+      phone: '+216 98 450 123',
+      email: 'ahmed.bensalem@gmail.tn',
+    },
+    payer: {
+      name: 'Ahmed Ben Salem',
+      phone: '+216 98 450 123',
+      isApplicant: true,
+    },
+    beneficiary: {
+      name: 'Fatma Ben Salem (Mère)',
+      phone: '+216 22 110 998',
+      isApplicant: false,
+    },
+    paymentMethod: 'cash', // Espèces à la pharmacie
+    prescription: {
+      required: false,
+      doctorName: '',
+      fileName: '',
+    },
+    status: 'confirmed',
+    statusLabel: 'Confirmée — Prête pour retrait',
+    statusDescription: 'L’officine a réservé vos boîtes au comptoir. Le bénéficiaire peut venir les récupérer.',
+    timeline: [
+      { step: 'Demande transmise', date: '21/11/2026 à 18:30', completed: true },
+      { step: 'Vérification pharmacie', date: '21/11/2026 à 18:45', completed: true },
+      { step: 'Prête au comptoir', date: '21/11/2026 à 19:10', completed: true, current: true },
+      { step: 'Retrait par le bénéficiaire', date: 'En attente', completed: false },
+    ],
+    simulatedNotifications: {
+      applicant: {
+        title: 'Demande DEM-0842 confirmée',
+        message: 'Pharmacie El Manar a validé la mise de côté. Prêt au comptoir pour Fatma Ben Salem.',
+        date: 'Il y a 2h',
+      },
+      beneficiary: {
+        title: 'SMS envoyé au bénéficiaire (+216 22 110 998)',
+        message: 'PharmaCityTN : Mme Fatma Ben Salem, vos médicaments sont prêts à la Pharmacie El Manar. Règlement de 5.700 TND au comptoir.',
+        date: 'Il y a 2h',
+        type: 'sms',
+      },
+    },
+  },
+  {
+    id: 'DEM-TN-2026-0795',
+    createdAt: '21/11/2026 à 14:15',
+    timestamp: Date.now() - 7 * 3600 * 1000,
+    medicine: {
+      id: 'med-2',
+      name: 'Augmentin Adulte',
+      dosage: '1 g',
+      form: 'Poudre pour suspension',
+      price: '16.420 TND',
+      unitPrice: 16.42,
+      prescriptionRequired: true,
+    },
+    quantity: 1,
+    totalAmount: '16.420 TND',
+    pharmacy: {
+      id: 'ph-5',
+      name: 'Pharmacie Ennasr',
+      address: 'Avenue Hédi Nouira, Ennasr 2',
+      city: 'Ariana',
+      phone: '+216 70 830 450',
+    },
+    applicant: {
+      name: 'Ahmed Ben Salem',
+      phone: '+216 98 450 123',
+      email: 'ahmed.bensalem@gmail.tn',
+    },
+    payer: {
+      name: 'Ahmed Ben Salem',
+      phone: '+216 98 450 123',
+      isApplicant: true,
+    },
+    beneficiary: {
+      name: 'Ahmed Ben Salem',
+      phone: '+216 98 450 123',
+      isApplicant: true,
+    },
+    paymentMethod: 'card', // Carte bancaire simulée
+    prescription: {
+      required: true,
+      doctorName: 'Dr. Mehdi Jaziri (Pneumologue)',
+      fileName: 'ordonnance_nov_2026.pdf',
+    },
+    status: 'pending_verification',
+    statusLabel: 'En attente de vérification',
+    statusDescription: 'L’ordonnance téléversée est en cours d’examen par l’équipe officinale.',
+    timeline: [
+      { step: 'Demande transmise', date: '21/11/2026 à 14:15', completed: true },
+      { step: 'Vérification ordonnance', date: 'En cours', completed: false, current: true },
+      { step: 'Confirmation pharmacie', date: 'En attente', completed: false },
+      { step: 'Retrait au comptoir', date: 'En attente', completed: false },
+    ],
+    simulatedNotifications: {
+      applicant: {
+        title: 'Ordonnance en cours de contrôle',
+        message: 'Pharmacie Ennasr vérifie la conformité de l’ordonnance du Dr. Mehdi Jaziri.',
+        date: 'Il y a 7h',
+      },
+      beneficiary: {
+        title: 'Notification bénéficiaire',
+        message: 'Votre demande pour Augmentin 1g a été prise en compte avec succès.',
+        date: 'Il y a 7h',
+        type: 'in_app',
+      },
+    },
+  },
+  {
+    id: 'DEM-TN-2026-0610',
+    createdAt: '20/11/2026 à 10:20',
+    timestamp: Date.now() - 32 * 3600 * 1000,
+    medicine: {
+      id: 'med-5',
+      name: 'Inexium',
+      dosage: '20 mg',
+      form: 'Gélule gastro-résistante',
+      price: '18.900 TND',
+      unitPrice: 18.9,
+      prescriptionRequired: true,
+    },
+    quantity: 1,
+    totalAmount: '18.900 TND',
+    pharmacy: {
+      id: 'ph-2',
+      name: 'Pharmacie Centrale Bourguiba',
+      address: '45 Avenue Habib Bourguiba',
+      city: 'Tunis',
+      phone: '+216 71 254 800',
+    },
+    applicant: {
+      name: 'Ahmed Ben Salem',
+      phone: '+216 98 450 123',
+      email: 'ahmed.bensalem@gmail.tn',
+    },
+    payer: {
+      name: 'Société MediAssur (Prise en charge)',
+      phone: '+216 71 300 200',
+      isApplicant: false,
+    },
+    beneficiary: {
+      name: 'Ahmed Ben Salem',
+      phone: '+216 98 450 123',
+      isApplicant: true,
+    },
+    paymentMethod: 'cash',
+    prescription: {
+      required: true,
+      doctorName: 'Dr. Leila Trabelsi',
+      fileName: 'ordo_inexium.jpg',
+    },
+    status: 'completed',
+    statusLabel: 'Terminée — Retirée',
+    statusDescription: 'Médicament récupéré personnellement au comptoir de la pharmacie.',
+    timeline: [
+      { step: 'Demande transmise', date: '20/11/2026 à 10:20', completed: true },
+      { step: 'Vérification ordonnance', date: '20/11/2026 à 10:40', completed: true },
+      { step: 'Confirmation pharmacie', date: '20/11/2026 à 11:05', completed: true },
+      { step: 'Délivré au comptoir', date: '20/11/2026 à 16:30', completed: true, current: true },
+    ],
+    simulatedNotifications: {
+      applicant: {
+        title: 'Délivrance effectuée',
+        message: 'Retrait confirmé au comptoir de la Pharmacie Centrale Bourguiba.',
+        date: 'Hier',
+      },
+      beneficiary: {
+        title: 'Retrait clôturé',
+        message: 'Merci d’avoir utilisé PharmaCityTN. Bon rétablissement !',
+        date: 'Hier',
+        type: 'sms',
+      },
+    },
+  },
+  {
+    id: 'DEM-TN-2026-0520',
+    createdAt: '18/11/2026 à 09:00',
+    timestamp: Date.now() - 80 * 3600 * 1000,
+    medicine: {
+      id: 'med-3',
+      name: 'Maxilase',
+      dosage: '200 U.CEIP/ml',
+      form: 'Sirop',
+      price: '4.750 TND',
+      unitPrice: 4.75,
+      prescriptionRequired: false,
+    },
+    quantity: 2,
+    totalAmount: '9.500 TND',
+    pharmacy: {
+      id: 'ph-1',
+      name: 'Pharmacie El Manar',
+      address: 'Avenue Habib Bourguiba, El Manar II',
+      city: 'Tunis',
+      phone: '+216 71 885 920',
+    },
+    applicant: {
+      name: 'Ahmed Ben Salem',
+      phone: '+216 98 450 123',
+      email: 'ahmed.bensalem@gmail.tn',
+    },
+    payer: {
+      name: 'Ahmed Ben Salem',
+      phone: '+216 98 450 123',
+      isApplicant: true,
+    },
+    beneficiary: {
+      name: 'Sami Ben Salem (Fils)',
+      phone: '+216 55 889 120',
+      isApplicant: false,
+    },
+    paymentMethod: 'cash',
+    prescription: {
+      required: false,
+      doctorName: '',
+      fileName: '',
+    },
+    status: 'rejected',
+    statusLabel: 'Refusée — Rupture constatée',
+    statusDescription: 'L’officine a signalé un épuisement subit du stock avant la préparation de la commande.',
+    timeline: [
+      { step: 'Demande transmise', date: '18/11/2026 à 09:00', completed: true },
+      { step: 'Rupture signalée', date: '18/11/2026 à 09:25', completed: true, current: true, error: true },
+    ],
+    simulatedNotifications: {
+      applicant: {
+        title: 'Demande DEM-0520 non validée',
+        message: 'Pharmacie El Manar signale une rupture de stock subite pour Maxilase Sirop.',
+        date: 'Il y a 3 jours',
+      },
+      beneficiary: {
+        title: 'Alerte indisponibilité',
+        message: 'Le sirop demandé n’est plus disponible dans cette officine. Veuillez vérifier une autre pharmacie.',
+        date: 'Il y a 3 jours',
+        type: 'sms',
+      },
+    },
+  },
+];
