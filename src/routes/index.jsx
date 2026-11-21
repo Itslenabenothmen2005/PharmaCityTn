@@ -16,6 +16,7 @@ import UserDashboard from '../pages/user/UserDashboard';
 import SearchPage from '../pages/user/SearchPage';
 import FavoritesPage from '../pages/user/FavoritesPage';
 import NotificationsPage from '../pages/user/NotificationsPage';
+import UserProfilePage from '../pages/user/UserProfilePage';
 
 // Pages pharmacie
 import PharmacyDashboard from '../pages/pharmacy/PharmacyDashboard';
@@ -48,6 +49,7 @@ const router = createBrowserRouter([
       { path: 'search', element: <SearchPage /> },
       { path: 'favorites', element: <FavoritesPage /> },
       { path: 'notifications', element: <NotificationsPage /> },
+      { path: 'profile', element: <UserProfilePage /> },
     ],
   },
 

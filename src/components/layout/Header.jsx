@@ -17,6 +17,7 @@ import {
 import Logo from '../common/Logo';
 import Button from '../common/Button';
 import Badge from '../common/Badge';
+import { useUserStore } from '../../hooks/useUserStore';
 
 /**
  * Composant Header Réutilisable PharmaCityTN
@@ -27,6 +28,19 @@ export default function Header({ variant = 'public' }) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const location = useLocation();
   const navigate = useNavigate();
+
+  // On récupère le profil et le compteur non-lu si on est dans le UserStoreProvider
+  let profile = { name: 'Ahmed Ben Salem' };
+  let unreadCount = 0;
+  try {
+    const store = useUserStore();
+    if (store) {
+      profile = store.profile;
+      unreadCount = store.unreadCount;
+    }
+  } catch {}
+
+  const getInitial = (name) => (name ? name.charAt(0).toUpperCase() : 'A');
 
   // Navigation selon l'espace public requis :
   // - Accueil
@@ -43,6 +57,7 @@ export default function Header({ variant = 'public' }) {
     { to: '/user/search', label: 'Recherche', icon: Search },
     { to: '/user/favorites', label: 'Favoris', icon: Heart },
     { to: '/user/notifications', label: 'Notifications', icon: Bell },
+    { to: '/user/profile', label: 'Mon Profil', icon: User },
   ];
 
   const pharmacyLinks = [
@@ -222,7 +237,7 @@ export default function Header({ variant = 'public' }) {
 
             {variant === 'user' && (
               <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                <Link to="/user/notifications">
+                <Link to="/user/notifications" style={{ textDecoration: 'none' }}>
                   <div
                     style={{
                       display: 'flex',
@@ -236,56 +251,62 @@ export default function Header({ variant = 'public' }) {
                     }}
                   >
                     <Bell size={18} />
-                    <span
-                      style={{
-                        position: 'absolute',
-                        top: '4px',
-                        right: '4px',
-                        width: '8px',
-                        height: '8px',
-                        backgroundColor: 'var(--color-danger)',
-                        borderRadius: 'var(--radius-full)',
-                      }}
-                    />
+                    {unreadCount > 0 && (
+                      <span
+                        style={{
+                          position: 'absolute',
+                          top: '4px',
+                          right: '4px',
+                          width: '8px',
+                          height: '8px',
+                          backgroundColor: 'var(--color-danger)',
+                          borderRadius: 'var(--radius-full)',
+                        }}
+                      />
+                    )}
                   </div>
                 </Link>
-                <div
-                  style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '8px',
-                    padding: '4px 10px 4px 6px',
-                    borderRadius: 'var(--radius-full)',
-                    background: 'var(--color-bg-subtle)',
-                    border: '1px solid var(--color-border)',
-                  }}
-                >
+
+                <Link to="/user/profile" style={{ textDecoration: 'none' }}>
                   <div
                     style={{
-                      width: '28px',
-                      height: '28px',
-                      borderRadius: 'var(--radius-full)',
-                      backgroundColor: 'var(--color-primary)',
-                      color: 'var(--color-white)',
                       display: 'flex',
                       alignItems: 'center',
-                      justifyContent: 'center',
-                      fontSize: '12px',
-                      fontWeight: 'bold',
+                      gap: '8px',
+                      padding: '4px 10px 4px 6px',
+                      borderRadius: 'var(--radius-full)',
+                      background: 'var(--color-bg-subtle)',
+                      border: '1px solid var(--color-border)',
+                      cursor: 'pointer',
                     }}
                   >
-                    A
+                    <div
+                      style={{
+                        width: '28px',
+                        height: '28px',
+                        borderRadius: 'var(--radius-full)',
+                        backgroundColor: 'var(--color-primary)',
+                        color: 'var(--color-white)',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        fontSize: '12px',
+                        fontWeight: 'bold',
+                      }}
+                    >
+                      {getInitial(profile.name)}
+                    </div>
+                    <span
+                      style={{
+                        fontSize: 'var(--font-size-xs)',
+                        fontWeight: 'var(--font-weight-medium)',
+                        color: 'var(--color-text-primary)',
+                      }}
+                    >
+                      {profile.name?.split(' ')[0] || 'Mon Compte'}
+                    </span>
                   </div>
-                  <span
-                    style={{
-                      fontSize: 'var(--font-size-xs)',
-                      fontWeight: 'var(--font-weight-medium)',
-                      color: 'var(--color-text-primary)',
-                    }}
-                  >
-                    Mon Compte
-                  </span>
-                </div>
+                </Link>
               </div>
             )}
 
@@ -361,35 +382,37 @@ export default function Header({ variant = 'public' }) {
               </Link>
             ))}
 
-            <div
-              style={{
-                marginTop: '12px',
-                paddingTop: '12px',
-                borderTop: '1px solid var(--color-border-subtle)',
-                display: 'flex',
-                flexDirection: 'column',
-                gap: '8px',
-              }}
-            >
-              <Link
-                to="/login"
-                onClick={() => setMobileMenuOpen(false)}
-                style={{ textDecoration: 'none' }}
+            {variant === 'public' && (
+              <div
+                style={{
+                  marginTop: '12px',
+                  paddingTop: '12px',
+                  borderTop: '1px solid var(--color-border-subtle)',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  gap: '8px',
+                }}
               >
-                <Button variant="outline" size="sm" fullWidth icon={LogIn}>
-                  Connexion
-                </Button>
-              </Link>
-              <Link
-                to="/register"
-                onClick={() => setMobileMenuOpen(false)}
-                style={{ textDecoration: 'none' }}
-              >
-                <Button variant="primary" size="sm" fullWidth icon={UserPlus}>
-                  Créer un compte
-                </Button>
-              </Link>
-            </div>
+                <Link
+                  to="/login"
+                  onClick={() => setMobileMenuOpen(false)}
+                  style={{ textDecoration: 'none' }}
+                >
+                  <Button variant="outline" size="sm" fullWidth icon={LogIn}>
+                    Connexion
+                  </Button>
+                </Link>
+                <Link
+                  to="/register"
+                  onClick={() => setMobileMenuOpen(false)}
+                  style={{ textDecoration: 'none' }}
+                >
+                  <Button variant="primary" size="sm" fullWidth icon={UserPlus}>
+                    Créer un compte
+                  </Button>
+                </Link>
+              </div>
+            )}
           </nav>
         </div>
       )}
