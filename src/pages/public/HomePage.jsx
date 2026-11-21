@@ -1,654 +1,937 @@
 import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import {
   Search,
-  CheckCircle2,
-  AlertTriangle,
-  XCircle,
-  Clock,
   MapPin,
-  Pill,
-  Building2,
-  User,
+  Clock,
+  Phone,
+  CheckCircle2,
   ShieldCheck,
-  Heart,
-  Bell,
-  Package,
-  Layers,
+  Building2,
   Sparkles,
   ArrowRight,
-  Send,
+  PhoneCall,
+  Eye,
   SlidersHorizontal,
+  Zap,
+  HeartHandshake,
+  CalendarCheck,
+  Navigation,
 } from 'lucide-react';
-import Logo from '../../components/common/Logo';
 import Button from '../../components/common/Button';
-import Input from '../../components/common/Input';
 import SearchBar from '../../components/common/SearchBar';
 import Card from '../../components/common/Card';
 import Badge from '../../components/common/Badge';
 import Modal from '../../components/common/Modal';
-import Loading from '../../components/common/Loading';
-import EmptyState from '../../components/common/EmptyState';
+import MedicalHeroIllustration from '../../components/common/MedicalHeroIllustration';
+import { mockPharmacies } from '../../data/pharmacies';
 import { useToast } from '../../hooks/useToast';
 
 export default function HomePage() {
+  const navigate = useNavigate();
   const toast = useToast();
-  const [searchQuery, setSearchQuery] = useState('');
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const [btnLoading, setBtnLoading] = useState(false);
-  const [demoInput, setDemoInput] = useState('');
-  const [demoError, setDemoError] = useState('');
 
-  const handleSearch = (query) => {
-    toast.info(`Recherche simulée pour : "${query || 'Tous les médicaments'}"`, 'Recherche');
+  const [searchQuery, setSearchQuery] = useState('');
+  const [selectedCity, setSelectedCity] = useState('all');
+  const [selectedPharmacy, setSelectedPharmacy] = useState(null);
+  const [isDetailsModalOpen, setIsDetailsModalOpen] = useState(false);
+
+  // Redirection cohérente de la barre de recherche vers la page de recherche
+  const handleSearchSubmit = (term) => {
+    const query = term !== undefined ? term : searchQuery;
+    if (query && query.trim()) {
+      navigate(`/user/search?q=${encodeURIComponent(query.trim())}`);
+    } else {
+      navigate('/user/search');
+    }
   };
 
-  const handleTestLoading = () => {
-    setBtnLoading(true);
-    setTimeout(() => {
-      setBtnLoading(false);
-      toast.success('Action terminée avec succès !', 'Chargement');
-    }, 1500);
+  // Filtrage des pharmacies fictives
+  const filteredPharmacies = mockPharmacies.filter((pharma) => {
+    if (selectedCity === 'all') return true;
+    if (selectedCity === 'open') return pharma.isOpen;
+    if (selectedCity === 'night') return pharma.isNightDuty;
+    return pharma.city.toLowerCase() === selectedCity.toLowerCase();
+  });
+
+  const handleOpenDetails = (pharma) => {
+    setSelectedPharmacy(pharma);
+    setIsDetailsModalOpen(true);
+  };
+
+  const handleCallPharmacy = (pharma, e) => {
+    e.stopPropagation();
+    toast.info(`Appel vers ${pharma.name} : ${pharma.phone}`, 'Appel Officine');
+    window.location.href = `tel:${pharma.phone.replace(/\s+/g, '')}`;
   };
 
   return (
     <div style={{ backgroundColor: 'var(--color-bg)', minHeight: '100%' }}>
       {/* ==========================================================================
-          HERO SECTION PHARMACITYTN
+          2. SECTION HERO
           ========================================================================== */}
       <section
         style={{
           background: 'linear-gradient(180deg, var(--color-primary-light) 0%, var(--color-bg) 100%)',
-          padding: 'var(--spacing-3xl) 0 var(--spacing-2xl)',
+          padding: 'var(--spacing-3xl) 0 var(--spacing-4xl)',
           borderBottom: '1px solid var(--color-border-subtle)',
+          position: 'relative',
+          overflow: 'hidden',
         }}
       >
-        <div className="container" style={{ textAlign: 'center', maxWidth: '860px' }}>
-          {/* Tagline / Badge Supérieur */}
-          <div style={{ display: 'inline-flex', marginBottom: 'var(--spacing-md)' }}>
-            <Badge variant="primary" size="md" icon={<Sparkles size={14} />}>
-              Plateforme Santé Officielle en Tunisie
-            </Badge>
-          </div>
-
-          <h1
-            style={{
-              fontSize: 'clamp(2rem, 5vw, 3rem)',
-              fontWeight: 'var(--font-weight-extrabold)',
-              color: 'var(--color-text-primary)',
-              lineHeight: 1.15,
-              marginBottom: 'var(--spacing-md)',
-            }}
-          >
-            Trouvez vos médicaments disponibles{' '}
-            <span style={{ color: 'var(--color-primary)' }}>en pharmacie</span> en Tunisie
-          </h1>
-
-          <p
-            style={{
-              fontSize: 'var(--font-size-lg)',
-              color: 'var(--color-text-secondary)',
-              maxWidth: '680px',
-              margin: '0 auto var(--spacing-xl)',
-              lineHeight: 'var(--line-height-relaxed)',
-            }}
-          >
-            Vérifiez en temps réel la disponibilité des stocks dans les officines les plus proches,
-            localisez les pharmacies de garde et gagnez du temps.
-          </p>
-
-          {/* SearchBar Principale Réutilisable */}
-          <div
-            style={{
-              maxWidth: '720px',
-              margin: '0 auto var(--spacing-xl)',
-            }}
-          >
-            <SearchBar
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              onSearch={handleSearch}
-              size="lg"
-              placeholder="Rechercher par nom de médicament, DCI ou laboratoire..."
-              suggestions={['Doliprane 1000', 'Augmentin 1g', 'Maxilase', 'Panadol', 'Paracétamol']}
-              onSelectSuggestion={(item) => {
-                setSearchQuery(item);
-                handleSearch(item);
-              }}
-            />
-          </div>
-
-          {/* Raccourcis Rapides vers les Espaces */}
-          <div
-            style={{
-              display: 'flex',
-              gap: '12px',
-              justifyContent: 'center',
-              flexWrap: 'wrap',
-            }}
-          >
-            <Link to="/user/search" style={{ textDecoration: 'none' }}>
-              <Button variant="primary" size="md" icon={Search}>
-                Recherche Médicaments
-              </Button>
-            </Link>
-            <Link to="/user/dashboard" style={{ textDecoration: 'none' }}>
-              <Button variant="secondary" size="md" icon={User}>
-                Espace Citoyen
-              </Button>
-            </Link>
-            <Link to="/pharmacy/dashboard" style={{ textDecoration: 'none' }}>
-              <Button variant="outline" size="md" icon={Building2}>
-                Espace Pharmacie
-              </Button>
-            </Link>
-          </div>
-        </div>
-      </section>
-
-      {/* ==========================================================================
-          SHOWCASE DU DESIGN SYSTEM REUTILISABLE
-          ========================================================================== */}
-      <section className="container" style={{ padding: 'var(--spacing-3xl) var(--spacing-md)' }}>
-        <div style={{ textAlign: 'center', marginBottom: 'var(--spacing-2xl)' }}>
-          <Badge variant="neutral" size="sm">
-            Architecture Frontend
-          </Badge>
-          <h2
-            style={{
-              fontSize: 'var(--font-size-3xl)',
-              marginTop: 'var(--spacing-xs)',
-              marginBottom: 'var(--spacing-xs)',
-            }}
-          >
-            Design System PharmaCityTN
-          </h2>
-          <p style={{ color: 'var(--color-text-secondary)', maxWidth: '600px', margin: '0 auto' }}>
-            Composants UI modulaires, accessibles et conformes aux exigences du domaine médical
-          </p>
-        </div>
-
-        {/* 1. PALETTE DE COULEURS OFFICIELLE */}
-        <div style={{ marginBottom: 'var(--spacing-3xl)' }}>
-          <h3 style={{ fontSize: 'var(--font-size-xl)', marginBottom: 'var(--spacing-md)' }}>
-            🎨 1. Palette de Couleurs
-          </h3>
-          <div
-            style={{
-              display: 'grid',
-              gridTemplateColumns: 'repeat(auto-fit, minmax(135px, 1fr))',
-              gap: '12px',
-            }}
-          >
-            {[
-              { name: 'Vert principal', hex: '#168B70', bg: '#168B70', text: '#FFFFFF', desc: 'Action & Marque' },
-              { name: 'Vert foncé', hex: '#116B58', bg: '#116B58', text: '#FFFFFF', desc: 'Survol & Accent' },
-              { name: 'Vert clair', hex: '#E8F5F0', bg: '#E8F5F0', text: '#116B58', desc: 'Fonds doux & Badges' },
-              { name: 'Blanc', hex: '#FFFFFF', bg: '#FFFFFF', text: '#0F172A', border: true, desc: 'Surfaces cartes' },
-              { name: 'Fond app', hex: '#F7F9F8', bg: '#F7F9F8', text: '#0F172A', border: true, desc: 'Arrière-plan' },
-              { name: 'Texte secondaire', hex: '#64748B', bg: '#64748B', text: '#FFFFFF', desc: 'Labels & Légendes' },
-              { name: 'Rouge Erreur', hex: '#EF4444', bg: '#EF4444', text: '#FFFFFF', desc: 'Rupture & Alertes' },
-              { name: 'Orange Stock', hex: '#F59E0B', bg: '#F59E0B', text: '#FFFFFF', desc: 'Stocks faibles' },
-            ].map((col) => (
-              <div
-                key={col.hex}
-                style={{
-                  backgroundColor: col.bg,
-                  color: col.text,
-                  padding: '16px 12px',
-                  borderRadius: 'var(--radius-md)',
-                  border: col.border ? '1px solid var(--color-border)' : 'none',
-                  boxShadow: 'var(--shadow-xs)',
-                  display: 'flex',
-                  flexDirection: 'column',
-                  gap: '4px',
-                }}
-              >
-                <span style={{ fontSize: '12px', fontWeight: 'bold' }}>{col.name}</span>
-                <span style={{ fontSize: '11px', opacity: 0.9, fontFamily: 'var(--font-family-mono)' }}>
-                  {col.hex}
-                </span>
-                <span style={{ fontSize: '10px', opacity: 0.8, marginTop: 'auto' }}>{col.desc}</span>
-              </div>
-            ))}
-          </div>
-        </div>
-
-        {/* 2. BOUTONS REUTILISABLES */}
-        <div style={{ marginBottom: 'var(--spacing-3xl)' }}>
-          <h3 style={{ fontSize: 'var(--font-size-xl)', marginBottom: 'var(--spacing-md)' }}>
-            🔘 2. Boutons Réutilisables (`Button`)
-          </h3>
-          <Card padding="lg">
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
-              <div>
-                <p style={{ fontSize: '13px', fontWeight: 'bold', marginBottom: '8px' }}>
-                  Variantes de styles :
-                </p>
-                <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
-                  <Button variant="primary">Bouton Primary</Button>
-                  <Button variant="secondary">Bouton Secondary</Button>
-                  <Button variant="outline">Bouton Outline</Button>
-                  <Button variant="ghost">Bouton Ghost</Button>
-                  <Button variant="danger">Bouton Danger</Button>
-                  <Button variant="warning">Bouton Warning</Button>
-                </div>
-              </div>
-
-              <div>
-                <p style={{ fontSize: '13px', fontWeight: 'bold', marginBottom: '8px' }}>
-                  Tailles & États Interactifs :
-                </p>
-                <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap', alignItems: 'center' }}>
-                  <Button size="sm" icon={Pill}>
-                    Taille Small (sm)
-                  </Button>
-                  <Button size="md" icon={Search}>
-                    Taille Medium (md)
-                  </Button>
-                  <Button size="lg" icon={Heart}>
-                    Taille Large (lg)
-                  </Button>
-                  <Button
-                    variant="primary"
-                    loading={btnLoading}
-                    onClick={handleTestLoading}
-                    icon={Send}
-                  >
-                    {btnLoading ? 'Chargement...' : 'Tester Loading State'}
-                  </Button>
-                  <Button variant="primary" disabled>
-                    Désactivé
-                  </Button>
-                </div>
-              </div>
-            </div>
-          </Card>
-        </div>
-
-        {/* 3. BADGES DE STATUT */}
-        <div style={{ marginBottom: 'var(--spacing-3xl)' }}>
-          <h3 style={{ fontSize: 'var(--font-size-xl)', marginBottom: 'var(--spacing-md)' }}>
-            🏷️ 3. Badges de Disponibilité & Statut (`Badge`)
-          </h3>
-          <Card padding="md">
-            <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap', alignItems: 'center' }}>
-              <Badge variant="success" dot icon={<CheckCircle2 size={13} />}>
-                Disponible (En stock)
-              </Badge>
-              <Badge variant="warning" dot icon={<AlertTriangle size={13} />}>
-                Stock faible (&lt; 5 boîtes)
-              </Badge>
-              <Badge variant="danger" dot icon={<XCircle size={13} />}>
-                Rupture de stock
-              </Badge>
-              <Badge variant="info" icon={<Clock size={13} />}>
-                Pharmacie de nuit
-              </Badge>
-              <Badge variant="primary">Espace Officine</Badge>
-              <Badge variant="neutral">Générique disponible</Badge>
-              <Badge variant="success" size="sm" dot>
-                Ouverte
-              </Badge>
-              <Badge variant="danger" size="sm" dot>
-                Fermée
-              </Badge>
-            </div>
-          </Card>
-        </div>
-
-        {/* 4. CARTES METIER EXEMPLES */}
-        <div style={{ marginBottom: 'var(--spacing-3xl)' }}>
-          <h3 style={{ fontSize: 'var(--font-size-xl)', marginBottom: 'var(--spacing-md)' }}>
-            🃏 4. Cartes Réutilisables (`Card`)
-          </h3>
-          <div
-            style={{
-              display: 'grid',
-              gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))',
-              gap: '20px',
-            }}
-          >
-            {/* Carte Médicament */}
-            <Card
-              hoverable
-              title="Doliprane 1000 mg"
-              subtitle="Paracétamol — Comprimés effervescents (Boîte de 8)"
-              icon={<Pill size={20} />}
-              headerAction={<Badge variant="success" dot>Disponible</Badge>}
-              footer={
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                  <span style={{ fontSize: 'var(--font-size-sm)', fontWeight: 'bold', color: 'var(--color-primary)' }}>
-                    2.850 TND
-                  </span>
-                  <Button variant="outline" size="sm" icon={MapPin}>
-                    12 pharmacies
-                  </Button>
-                </div>
-              }
-            >
-              <p style={{ fontSize: 'var(--font-size-xs)', color: 'var(--color-text-secondary)', margin: 0 }}>
-                Indiqué dans le traitement symptomatique des douleurs d'intensité légère à modérée et/ou des états fébriles.
-              </p>
-            </Card>
-
-            {/* Carte Pharmacie de Garde */}
-            <Card
-              hoverable
-              title="Pharmacie El Manar"
-              subtitle="Dr. Nadia Mansour • Tunis"
-              icon={<Building2 size={20} />}
-              headerAction={<Badge variant="info">Garde de Nuit</Badge>}
-              footer={
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                  <span style={{ fontSize: 'var(--font-size-xs)', color: 'var(--color-text-secondary)' }}>
-                    Ouvert jusqu'à 08h00
-                  </span>
-                  <Button variant="secondary" size="sm">
-                    Itinéraire
-                  </Button>
-                </div>
-              }
-            >
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '6px', fontSize: 'var(--font-size-xs)' }}>
-                <span style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                  <MapPin size={14} color="var(--color-primary)" /> Avenue Habib Bourguiba, El Manar II
-                </span>
-                <span style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                  <Clock size={14} color="var(--color-primary)" /> Tél : 71 885 920
-                </span>
-              </div>
-            </Card>
-
-            {/* Carte Rupture de Stock */}
-            <Card
-              hoverable
-              title="Augmentin 1g"
-              subtitle="Amoxicilline / Acide clavulanique"
-              icon={<AlertTriangle size={20} />}
-              headerAction={<Badge variant="danger" dot>Rupture</Badge>}
-              footer={
-                <Button variant="ghost" size="sm" fullWidth icon={Bell}>
-                  Créer une alerte de disponibilité
-                </Button>
-              }
-            >
-              <p style={{ fontSize: 'var(--font-size-xs)', color: 'var(--color-text-secondary)', margin: 0 }}>
-                Ce médicament est actuellement indisponible dans votre secteur. Vous pouvez activer une alerte pour être notifié du réapprovisionnement.
-              </p>
-            </Card>
-          </div>
-        </div>
-
-        {/* 5. FORMULAIRES & INPUTS */}
-        <div style={{ marginBottom: 'var(--spacing-3xl)' }}>
-          <h3 style={{ fontSize: 'var(--font-size-xl)', marginBottom: 'var(--spacing-md)' }}>
-            📝 5. Champs de Saisie (`Input`)
-          </h3>
-          <Card padding="lg">
-            <div
-              style={{
-                display: 'grid',
-                gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))',
-                gap: '20px',
-              }}
-            >
-              <Input
-                label="Champ Standard"
-                placeholder="Entrez une valeur..."
-                helperText="Texte indicatif sous le champ"
-              />
-              <Input
-                label="Avec Icône & Obligatoire"
-                placeholder="Ex : Tunis, Sousse, Sfax..."
-                startIcon={<MapPin size={18} />}
-                required
-              />
-              <Input
-                label="État avec Erreur de Validation"
-                value={demoInput}
-                onChange={(e) => {
-                  setDemoInput(e.target.value);
-                  setDemoError(e.target.value.length < 5 ? 'Le texte doit comporter au moins 5 caractères' : '');
-                }}
-                error={demoError || 'Exemple : Médicament non reconnu dans la nomenclature'}
-              />
-              <Input
-                label="Champ Désactivé"
-                value="Officine agréée #TN-8491"
-                disabled
-              />
-            </div>
-          </Card>
-        </div>
-
-        {/* 6. MODALE, LOADING, NOTIFICATIONS TOAST & EMPTY STATE */}
-        <div style={{ marginBottom: 'var(--spacing-3xl)' }}>
-          <h3 style={{ fontSize: 'var(--font-size-xl)', marginBottom: 'var(--spacing-md)' }}>
-            ⚡ 6. Modale, Toasts, Loading & États Vides
-          </h3>
-
+        <div className="container">
           <div
             style={{
               display: 'grid',
               gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))',
-              gap: '20px',
+              gap: 'var(--spacing-3xl)',
+              alignItems: 'center',
             }}
           >
-            {/* Boîte à Outils Interactive */}
-            <Card title="Composants Interactifs" padding="lg">
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
-                <p style={{ fontSize: 'var(--font-size-xs)' }}>
-                  Testez en direct la modale et les notifications toasts personnalisées :
-                </p>
+            {/* Colonne Gauche : Titres, Sous-titre & Barre de recherche */}
+            <div style={{ maxWidth: '600px' }}>
+              <div style={{ display: 'inline-flex', marginBottom: 'var(--spacing-md)' }}>
+                <Badge variant="primary" size="md" icon={<Sparkles size={14} />}>
+                  Réseau Officiel des Pharmacies en Tunisie
+                </Badge>
+              </div>
 
-                <Button variant="primary" onClick={() => setIsModalOpen(true)} icon={Layers}>
-                  Ouvrir la Fenêtre Modale
-                </Button>
+              <h1
+                style={{
+                  fontSize: 'clamp(2.1rem, 4.5vw, 3.25rem)',
+                  fontWeight: 'var(--font-weight-extrabold)',
+                  color: 'var(--color-text-primary)',
+                  lineHeight: 1.15,
+                  letterSpacing: '-0.03em',
+                  marginBottom: 'var(--spacing-md)',
+                }}
+              >
+                Trouvez vos médicaments <span style={{ color: 'var(--color-primary)' }}>plus facilement.</span>
+              </h1>
 
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px' }}>
-                  <Button
-                    variant="secondary"
-                    size="sm"
-                    onClick={() => toast.success('Disponibilité confirmée en pharmacie !')}
-                  >
-                    Toast Succès
-                  </Button>
-                  <Button
-                    variant="warning"
-                    size="sm"
-                    onClick={() => toast.warning('Attention : Stock inférieur à 3 unités.')}
-                  >
-                    Toast Alerte
-                  </Button>
-                  <Button
-                    variant="danger"
-                    size="sm"
-                    onClick={() => toast.error('Rupture constatée dans tout le gouvernorat.')}
-                  >
-                    Toast Erreur
-                  </Button>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => toast.info('Pharmacie de garde activée à 20h00.')}
-                  >
-                    Toast Info
-                  </Button>
+              <p
+                style={{
+                  fontSize: 'var(--font-size-lg)',
+                  color: 'var(--color-text-secondary)',
+                  lineHeight: 'var(--line-height-relaxed)',
+                  marginBottom: 'var(--spacing-xl)',
+                }}
+              >
+                Consultez la disponibilité des médicaments dans les pharmacies tunisiennes et
+                gagnez du temps dans vos recherches.
+              </p>
+
+              {/* Barre de recherche centrale */}
+              <div style={{ marginBottom: 'var(--spacing-lg)' }}>
+                <SearchBar
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  onSearch={handleSearchSubmit}
+                  size="lg"
+                  buttonText="Rechercher"
+                  placeholder="Rechercher un médicament (Doliprane, Augmentin, Maxilase)..."
+                  suggestions={['Doliprane 1000', 'Augmentin 1g', 'Maxilase', 'Panadol', 'Paracétamol']}
+                  onSelectSuggestion={(s) => {
+                    setSearchQuery(s);
+                    handleSearchSubmit(s);
+                  }}
+                />
+              </div>
+
+              {/* Indicateurs de confiance */}
+              <div
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '20px',
+                  flexWrap: 'wrap',
+                  fontSize: 'var(--font-size-xs)',
+                  color: 'var(--color-text-secondary)',
+                }}
+              >
+                <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                  <CheckCircle2 size={16} color="var(--color-primary)" />
+                  <span>Officines conventionnées CNAM</span>
                 </div>
-
-                <div style={{ marginTop: '10px' }}>
-                  <p style={{ fontSize: 'var(--font-size-xs)', fontWeight: 'bold', marginBottom: '8px' }}>
-                    Indicateurs de Chargement (`Loading`) :
-                  </p>
-                  <div style={{ display: 'flex', gap: '20px', alignItems: 'center' }}>
-                    <Loading size="sm" text="Petit" />
-                    <Loading size="md" text="Normal" />
-                    <div style={{ flex: 1 }}>
-                      <Loading type="skeleton" height="18px" />
-                    </div>
-                  </div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                  <Clock size={16} color="var(--color-primary)" />
+                  <span>Gardes de jour & de nuit</span>
                 </div>
               </div>
-            </Card>
+            </div>
 
-            {/* Démonstration EmptyState */}
+            {/* Colonne Droite : Illustration médicale moderne */}
             <div>
-              <EmptyState
-                icon={Search}
-                title="Aucun médicament trouvé"
-                description="Nous n'avons trouvé aucun résultat correspondant à vos critères dans les pharmacies environnantes."
-                action={
-                  <Button
-                    variant="secondary"
-                    size="sm"
-                    onClick={() => toast.info('Suggestions d’alternatives génériques')}
-                  >
-                    Voir les alternatives génériques
-                  </Button>
-                }
-              />
+              <MedicalHeroIllustration />
             </div>
           </div>
-        </div>
-
-        {/* 7. MATRICE COMPLETE DES ROUTES DU PROJET */}
-        <div style={{ marginBottom: 'var(--spacing-2xl)' }}>
-          <h3 style={{ fontSize: 'var(--font-size-xl)', marginBottom: 'var(--spacing-md)' }}>
-            🧭 7. Navigation Globale du Projet (Vérification des Routes)
-          </h3>
-          <Card padding="lg">
-            <p style={{ color: 'var(--color-text-secondary)', marginBottom: '16px', fontSize: 'var(--font-size-sm)' }}>
-              Toutes les routes principales sont branchées et opérationnelles. Cliquez pour naviguer :
-            </p>
-            <div
-              style={{
-                display: 'grid',
-                gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))',
-                gap: '12px',
-              }}
-            >
-              {[
-                { path: '/', label: 'Accueil Public', icon: '🏠', desc: 'Page principale' },
-                { path: '/login', label: '/login', icon: '🔐', desc: 'Connexion' },
-                { path: '/register', label: '/register', icon: '📝', desc: 'Inscription' },
-                { path: '/user/dashboard', label: '/user/dashboard', icon: '👤', desc: 'Tableau de bord citoyen' },
-                { path: '/user/search', label: '/user/search', icon: '🔍', desc: 'Recherche médicaments' },
-                { path: '/user/favorites', label: '/user/favorites', icon: '⭐', desc: 'Pharmacies favorites' },
-                { path: '/user/notifications', label: '/user/notifications', icon: '🔔', desc: 'Alertes stock' },
-                { path: '/pharmacy/dashboard', label: '/pharmacy/dashboard', icon: '🏥', desc: 'Tableau de bord pharmacien' },
-                { path: '/pharmacy/medicines', label: '/pharmacy/medicines', icon: '💊', desc: 'Catalogue officine' },
-                { path: '/pharmacy/stock', label: '/pharmacy/stock', icon: '📦', desc: 'Gestion de stock' },
-                { path: '/pharmacy/profile', label: '/pharmacy/profile', icon: '🏪', desc: 'Profil officine' },
-              ].map((item) => (
-                <Link
-                  key={item.path}
-                  to={item.path}
-                  style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'space-between',
-                    padding: '12px 14px',
-                    borderRadius: 'var(--radius-md)',
-                    backgroundColor: 'var(--color-bg-subtle)',
-                    border: '1px solid var(--color-border-subtle)',
-                    textDecoration: 'none',
-                    transition: 'all var(--transition-fast)',
-                  }}
-                  onMouseEnter={(e) => {
-                    e.currentTarget.style.backgroundColor = 'var(--color-primary-light)';
-                    e.currentTarget.style.borderColor = 'var(--color-primary)';
-                  }}
-                  onMouseLeave={(e) => {
-                    e.currentTarget.style.backgroundColor = 'var(--color-bg-subtle)';
-                    e.currentTarget.style.borderColor = 'var(--color-border-subtle)';
-                  }}
-                >
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                    <span style={{ fontSize: '18px' }}>{item.icon}</span>
-                    <div>
-                      <div
-                        style={{
-                          fontSize: 'var(--font-size-xs)',
-                          fontWeight: 'bold',
-                          color: 'var(--color-text-primary)',
-                        }}
-                      >
-                        {item.label}
-                      </div>
-                      <div style={{ fontSize: '11px', color: 'var(--color-text-secondary)' }}>
-                        {item.desc}
-                      </div>
-                    </div>
-                  </div>
-                  <ArrowRight size={14} color="var(--color-primary)" />
-                </Link>
-              ))}
-            </div>
-          </Card>
         </div>
       </section>
 
       {/* ==========================================================================
-          FENETRE MODALE DE DEMONSTRATION
+          3. SECTION « COMMENT ÇA MARCHE ? »
           ========================================================================== */}
-      <Modal
-        isOpen={isModalOpen}
-        onClose={() => setIsModalOpen(false)}
-        title="Détails de la Pharmacie & Disponibilité"
-        description="Informations certifiées transmises par l'officine partenaire"
-        footer={
-          <>
-            <Button variant="ghost" onClick={() => setIsModalOpen(false)}>
-              Fermer
-            </Button>
-            <Button
-              variant="primary"
-              onClick={() => {
-                setIsModalOpen(false);
-                toast.success('Pharmacie ajoutée à vos favoris !');
-              }}
-              icon={Heart}
-            >
-              Ajouter aux favoris
-            </Button>
-          </>
-        }
+      <section
+        id="how-it-works"
+        style={{
+          padding: 'var(--spacing-4xl) 0',
+          backgroundColor: 'var(--color-bg-surface)',
+          borderBottom: '1px solid var(--color-border)',
+        }}
       >
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+        <div className="container">
+          <div style={{ textAlign: 'center', marginBottom: 'var(--spacing-3xl)' }}>
+            <Badge variant="primary" size="sm">
+              Processus Simple & Transparent
+            </Badge>
+            <h2
+              style={{
+                fontSize: 'var(--font-size-3xl)',
+                marginTop: 'var(--spacing-xs)',
+                marginBottom: 'var(--spacing-xs)',
+              }}
+            >
+              Comment ça marche ?
+            </h2>
+            <p
+              style={{
+                fontSize: 'var(--font-size-base)',
+                color: 'var(--color-text-secondary)',
+                maxWidth: '560px',
+                margin: '0 auto',
+              }}
+            >
+              En trois étapes rapides, identifiez la pharmacie qui détient votre traitement en stock.
+            </p>
+          </div>
+
           <div
             style={{
-              padding: '12px',
-              borderRadius: 'var(--radius-md)',
-              backgroundColor: 'var(--color-primary-light)',
-              display: 'flex',
-              alignItems: 'center',
-              gap: '10px',
+              display: 'grid',
+              gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))',
+              gap: 'var(--spacing-xl)',
+              position: 'relative',
             }}
           >
-            <ShieldCheck size={24} color="var(--color-primary)" />
-            <div>
-              <strong style={{ color: 'var(--color-primary-dark)', fontSize: 'var(--font-size-sm)' }}>
-                Pharmacie Conventionnée CNAM & MSP
-              </strong>
-              <p style={{ margin: 0, fontSize: 'var(--font-size-xs)', color: 'var(--color-text-secondary)' }}>
-                Mise à jour automatique des stocks toutes les 15 minutes.
+            {/* Étape 1 */}
+            <Card hoverable padding="lg">
+              <div style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
+                <div
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                    marginBottom: 'var(--spacing-md)',
+                  }}
+                >
+                  <div
+                    style={{
+                      width: '54px',
+                      height: '54px',
+                      borderRadius: 'var(--radius-lg)',
+                      backgroundColor: 'var(--color-primary-light)',
+                      color: 'var(--color-primary)',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                    }}
+                  >
+                    <Search size={26} strokeWidth={2.2} />
+                  </div>
+                  <span
+                    style={{
+                      fontSize: 'var(--font-size-2xl)',
+                      fontWeight: 'var(--font-weight-extrabold)',
+                      color: 'var(--color-primary)',
+                      opacity: 0.35,
+                      fontFamily: 'var(--font-family-mono)',
+                    }}
+                  >
+                    01
+                  </span>
+                </div>
+
+                <h3
+                  style={{
+                    fontSize: 'var(--font-size-lg)',
+                    fontWeight: 'var(--font-weight-bold)',
+                    color: 'var(--color-text-primary)',
+                    marginBottom: 'var(--spacing-xs)',
+                  }}
+                >
+                  1. Recherchez votre médicament
+                </h3>
+
+                <p
+                  style={{
+                    fontSize: 'var(--font-size-sm)',
+                    color: 'var(--color-text-secondary)',
+                    lineHeight: 'var(--line-height-relaxed)',
+                    margin: 0,
+                  }}
+                >
+                  Indiquez le nom commercial, le dosage ou la DCI de votre traitement dans la barre de
+                  recherche intuitive.
+                </p>
+              </div>
+            </Card>
+
+            {/* Étape 2 */}
+            <Card hoverable padding="lg">
+              <div style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
+                <div
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                    marginBottom: 'var(--spacing-md)',
+                  }}
+                >
+                  <div
+                    style={{
+                      width: '54px',
+                      height: '54px',
+                      borderRadius: 'var(--radius-lg)',
+                      backgroundColor: 'var(--color-primary-light)',
+                      color: 'var(--color-primary)',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                    }}
+                  >
+                    <Building2 size={26} strokeWidth={2.2} />
+                  </div>
+                  <span
+                    style={{
+                      fontSize: 'var(--font-size-2xl)',
+                      fontWeight: 'var(--font-weight-extrabold)',
+                      color: 'var(--color-primary)',
+                      opacity: 0.35,
+                      fontFamily: 'var(--font-family-mono)',
+                    }}
+                  >
+                    02
+                  </span>
+                </div>
+
+                <h3
+                  style={{
+                    fontSize: 'var(--font-size-lg)',
+                    fontWeight: 'var(--font-weight-bold)',
+                    color: 'var(--color-text-primary)',
+                    marginBottom: 'var(--spacing-xs)',
+                  }}
+                >
+                  2. Consultez les pharmacies disponibles
+                </h3>
+
+                <p
+                  style={{
+                    fontSize: 'var(--font-size-sm)',
+                    color: 'var(--color-text-secondary)',
+                    lineHeight: 'var(--line-height-relaxed)',
+                    margin: 0,
+                  }}
+                >
+                  Accédez à la liste des officines qui disposent du produit en stock, avec leurs
+                  adresses exactes, distances et horaires de garde.
+                </p>
+              </div>
+            </Card>
+
+            {/* Étape 3 */}
+            <Card hoverable padding="lg">
+              <div style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
+                <div
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                    marginBottom: 'var(--spacing-md)',
+                  }}
+                >
+                  <div
+                    style={{
+                      width: '54px',
+                      height: '54px',
+                      borderRadius: 'var(--radius-lg)',
+                      backgroundColor: 'var(--color-primary-light)',
+                      color: 'var(--color-primary)',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                    }}
+                  >
+                    <PhoneCall size={26} strokeWidth={2.2} />
+                  </div>
+                  <span
+                    style={{
+                      fontSize: 'var(--font-size-2xl)',
+                      fontWeight: 'var(--font-weight-extrabold)',
+                      color: 'var(--color-primary)',
+                      opacity: 0.35,
+                      fontFamily: 'var(--font-family-mono)',
+                    }}
+                  >
+                    03
+                  </span>
+                </div>
+
+                <h3
+                  style={{
+                    fontSize: 'var(--font-size-lg)',
+                    fontWeight: 'var(--font-weight-bold)',
+                    color: 'var(--color-text-primary)',
+                    marginBottom: 'var(--spacing-xs)',
+                  }}
+                >
+                  3. Contactez la pharmacie pour confirmer
+                </h3>
+
+                <p
+                  style={{
+                    fontSize: 'var(--font-size-sm)',
+                    color: 'var(--color-text-secondary)',
+                    lineHeight: 'var(--line-height-relaxed)',
+                    margin: 0,
+                  }}
+                >
+                  Appelez directement l’officine en un clic pour vous assurer de la disponibilité ou
+                  réserver votre médicament avant votre déplacement.
+                </p>
+              </div>
+            </Card>
+          </div>
+        </div>
+      </section>
+
+      {/* ==========================================================================
+          4. SECTION AVANTAGES
+          ========================================================================== */}
+      <section style={{ padding: 'var(--spacing-4xl) 0', backgroundColor: 'var(--color-bg)' }}>
+        <div className="container">
+          <div style={{ textAlign: 'center', marginBottom: 'var(--spacing-3xl)' }}>
+            <Badge variant="neutral" size="sm">
+              Pourquoi PharmaCityTN ?
+            </Badge>
+            <h2
+              style={{
+                fontSize: 'var(--font-size-3xl)',
+                marginTop: 'var(--spacing-xs)',
+                marginBottom: 'var(--spacing-xs)',
+              }}
+            >
+              Les avantages de notre plateforme
+            </h2>
+            <p
+              style={{
+                fontSize: 'var(--font-size-base)',
+                color: 'var(--color-text-secondary)',
+                maxWidth: '600px',
+                margin: '0 auto',
+              }}
+            >
+              Une solution pensée pour simplifier le parcours de santé des citoyens tunisiens.
+            </p>
+          </div>
+
+          <div
+            style={{
+              display: 'grid',
+              gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))',
+              gap: 'var(--spacing-xl)',
+            }}
+          >
+            {/* Avantage 1 : Recherche simplifiée */}
+            <Card hoverable padding="lg">
+              <div
+                style={{
+                  width: '46px',
+                  height: '46px',
+                  borderRadius: 'var(--radius-md)',
+                  backgroundColor: 'var(--color-primary-light)',
+                  color: 'var(--color-primary)',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  marginBottom: 'var(--spacing-md)',
+                }}
+              >
+                <Search size={22} />
+              </div>
+              <h3
+                style={{
+                  fontSize: 'var(--font-size-base)',
+                  fontWeight: 'var(--font-weight-bold)',
+                  color: 'var(--color-text-primary)',
+                  marginBottom: 'var(--spacing-xs)',
+                }}
+              >
+                Recherche simplifiée
+              </h3>
+              <p style={{ fontSize: 'var(--font-size-sm)', color: 'var(--color-text-secondary)', margin: 0 }}>
+                Retrouvez vos médicaments en quelques frappes grâce à notre moteur de recherche rapide
+                avec auto-complétion et suggestions intelligentes.
               </p>
+            </Card>
+
+            {/* Avantage 2 : Informations de disponibilité */}
+            <Card hoverable padding="lg">
+              <div
+                style={{
+                  width: '46px',
+                  height: '46px',
+                  borderRadius: 'var(--radius-md)',
+                  backgroundColor: 'var(--color-primary-light)',
+                  color: 'var(--color-primary)',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  marginBottom: 'var(--spacing-md)',
+                }}
+              >
+                <CheckCircle2 size={22} />
+              </div>
+              <h3
+                style={{
+                  fontSize: 'var(--font-size-base)',
+                  fontWeight: 'var(--font-weight-bold)',
+                  color: 'var(--color-text-primary)',
+                  marginBottom: 'var(--spacing-xs)',
+                }}
+              >
+                Informations de disponibilité
+              </h3>
+              <p style={{ fontSize: 'var(--font-size-sm)', color: 'var(--color-text-secondary)', margin: 0 }}>
+                Visualisez clairement le statut des stocks (Disponible, Stock faible, Rupture)
+                mis à jour pour éviter toute mauvaise surprise.
+              </p>
+            </Card>
+
+            {/* Avantage 3 : Gain de temps */}
+            <Card hoverable padding="lg">
+              <div
+                style={{
+                  width: '46px',
+                  height: '46px',
+                  borderRadius: 'var(--radius-md)',
+                  backgroundColor: 'var(--color-primary-light)',
+                  color: 'var(--color-primary)',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  marginBottom: 'var(--spacing-md)',
+                }}
+              >
+                <Zap size={22} />
+              </div>
+              <h3
+                style={{
+                  fontSize: 'var(--font-size-base)',
+                  fontWeight: 'var(--font-weight-bold)',
+                  color: 'var(--color-text-primary)',
+                  marginBottom: 'var(--spacing-xs)',
+                }}
+              >
+                Gain de temps
+              </h3>
+              <p style={{ fontSize: 'var(--font-size-sm)', color: 'var(--color-text-secondary)', margin: 0 }}>
+                Évitez de faire le tour de la ville ou d'enchaîner des appels interminables : trouvez
+                directement l'officine la plus proche qui possède votre traitement.
+              </p>
+            </Card>
+
+            {/* Avantage 4 : Accès aux informations des pharmacies */}
+            <Card hoverable padding="lg">
+              <div
+                style={{
+                  width: '46px',
+                  height: '46px',
+                  borderRadius: 'var(--radius-md)',
+                  backgroundColor: 'var(--color-primary-light)',
+                  color: 'var(--color-primary)',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  marginBottom: 'var(--spacing-md)',
+                }}
+              >
+                <Building2 size={22} />
+              </div>
+              <h3
+                style={{
+                  fontSize: 'var(--font-size-base)',
+                  fontWeight: 'var(--font-weight-bold)',
+                  color: 'var(--color-text-primary)',
+                  marginBottom: 'var(--spacing-xs)',
+                }}
+              >
+                Accès aux informations des pharmacies
+              </h3>
+              <p style={{ fontSize: 'var(--font-size-sm)', color: 'var(--color-text-secondary)', margin: 0 }}>
+                Adresses géolocalisées, coordonnées téléphoniques directes, et indication précise des
+                gardes de jour et de nuit en Tunisie.
+              </p>
+            </Card>
+          </div>
+        </div>
+      </section>
+
+      {/* ==========================================================================
+          5. SECTION PHARMACIES (CARTES FICTIVES)
+          ========================================================================== */}
+      <section
+        style={{
+          padding: 'var(--spacing-4xl) 0',
+          backgroundColor: 'var(--color-bg-surface)',
+          borderTop: '1px solid var(--color-border)',
+          borderBottom: '1px solid var(--color-border)',
+        }}
+      >
+        <div className="container">
+          <div
+            style={{
+              display: 'flex',
+              flexWrap: 'wrap',
+              justifyContent: 'space-between',
+              alignItems: 'flex-end',
+              gap: '16px',
+              marginBottom: 'var(--spacing-2xl)',
+            }}
+          >
+            <div>
+              <Badge variant="primary" size="sm">
+                Réseau Partenaire
+              </Badge>
+              <h2
+                style={{
+                  fontSize: 'var(--font-size-3xl)',
+                  marginTop: 'var(--spacing-xs)',
+                  marginBottom: 'var(--spacing-2xs)',
+                }}
+              >
+                Officines de pharmacie en Tunisie
+              </h2>
+              <p style={{ fontSize: 'var(--font-size-sm)', color: 'var(--color-text-secondary)', margin: 0 }}>
+                Consultez quelques-unes des pharmacies partenaires référencées sur PharmaCityTN.
+              </p>
+            </div>
+
+            {/* Filtres de sélection rapide */}
+            <div
+              style={{
+                display: 'flex',
+                gap: '8px',
+                flexWrap: 'wrap',
+                backgroundColor: 'var(--color-bg-subtle)',
+                padding: '4px',
+                borderRadius: 'var(--radius-md)',
+              }}
+            >
+              {[
+                { id: 'all', label: 'Toutes' },
+                { id: 'open', label: 'Ouvertes' },
+                { id: 'night', label: 'Garde de Nuit' },
+                { id: 'tunis', label: 'Tunis' },
+                { id: 'sousse', label: 'Sousse' },
+                { id: 'sfax', label: 'Sfax' },
+              ].map((filter) => (
+                <button
+                  key={filter.id}
+                  type="button"
+                  onClick={() => setSelectedCity(filter.id)}
+                  style={{
+                    padding: '6px 12px',
+                    borderRadius: 'var(--radius-sm)',
+                    fontSize: 'var(--font-size-xs)',
+                    fontWeight: 'var(--font-weight-semibold)',
+                    backgroundColor:
+                      selectedCity === filter.id ? 'var(--color-white)' : 'transparent',
+                    color:
+                      selectedCity === filter.id ? 'var(--color-primary)' : 'var(--color-text-secondary)',
+                    boxShadow: selectedCity === filter.id ? 'var(--shadow-xs)' : 'none',
+                    cursor: 'pointer',
+                    transition: 'all var(--transition-fast)',
+                  }}
+                >
+                  {filter.label}
+                </button>
+              ))}
             </div>
           </div>
 
-          <Input
-            label="Note personnelle / Mémo"
-            placeholder="Ex : Récupérer après 18h..."
-            helperText="Visible uniquement depuis votre espace citoyen"
-          />
+          {/* Grille des cartes pharmacies */}
+          <div
+            style={{
+              display: 'grid',
+              gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))',
+              gap: 'var(--spacing-xl)',
+            }}
+          >
+            {filteredPharmacies.map((pharma) => (
+              <Card
+                key={pharma.id}
+                hoverable
+                title={pharma.name}
+                subtitle={`${pharma.pharmacist} • ${pharma.city}`}
+                icon={<Building2 size={20} />}
+                headerAction={
+                  pharma.isNightDuty ? (
+                    <Badge variant="info" dot>
+                      Garde 24h/24
+                    </Badge>
+                  ) : pharma.isOpen ? (
+                    <Badge variant="success" dot>
+                      Ouverte
+                    </Badge>
+                  ) : (
+                    <Badge variant="danger" dot>
+                      Fermée
+                    </Badge>
+                  )
+                }
+                footer={
+                  <div
+                    style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'space-between',
+                      gap: '8px',
+                    }}
+                  >
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      icon={Eye}
+                      onClick={() => handleOpenDetails(pharma)}
+                    >
+                      Détails
+                    </Button>
+                    <Button
+                      variant="primary"
+                      size="sm"
+                      icon={PhoneCall}
+                      onClick={(e) => handleCallPharmacy(pharma, e)}
+                    >
+                      Appeler
+                    </Button>
+                  </div>
+                }
+              >
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', fontSize: 'var(--font-size-xs)' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '6px', color: 'var(--color-text-secondary)' }}>
+                    <MapPin size={14} color="var(--color-primary)" />
+                    <span>{pharma.address}</span>
+                  </div>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '6px', color: 'var(--color-text-secondary)' }}>
+                    <Clock size={14} color="var(--color-primary)" />
+                    <span>{pharma.schedule} • à {pharma.distance}</span>
+                  </div>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '6px', color: 'var(--color-text-secondary)' }}>
+                    <Phone size={14} color="var(--color-primary)" />
+                    <span>{pharma.phone}</span>
+                  </div>
 
-          <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
-            <Badge variant="success" dot>En stock : 14 boîtes</Badge>
-            <Badge variant="info">Prix conventionné</Badge>
+                  {/* Tags d'agréments / services */}
+                  <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap', marginTop: '4px' }}>
+                    {pharma.features.map((feat) => (
+                      <span
+                        key={feat}
+                        style={{
+                          fontSize: '11px',
+                          padding: '2px 8px',
+                          borderRadius: 'var(--radius-xs)',
+                          backgroundColor: 'var(--color-bg-subtle)',
+                          color: 'var(--color-text-secondary)',
+                          border: '1px solid var(--color-border-subtle)',
+                        }}
+                      >
+                        {feat}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              </Card>
+            ))}
+          </div>
+
+          {/* Lien pour rechercher plus de pharmacies */}
+          <div style={{ textAlign: 'center', marginTop: 'var(--spacing-2xl)' }}>
+            <Link to="/user/search" style={{ textDecoration: 'none' }}>
+              <Button variant="secondary" size="md" icon={Search}>
+                Rechercher une autre pharmacie en Tunisie
+              </Button>
+            </Link>
           </div>
         </div>
-      </Modal>
+      </section>
+
+      {/* ==========================================================================
+          SECTION APPEL À L'ACTION (CTA PHARMACIENS & CITOYENS)
+          ========================================================================== */}
+      <section
+        style={{
+          padding: 'var(--spacing-4xl) 0',
+          background: 'linear-gradient(135deg, var(--color-primary) 0%, var(--color-primary-dark) 100%)',
+          color: 'var(--color-white)',
+        }}
+      >
+        <div className="container" style={{ textAlign: 'center', maxWidth: '780px' }}>
+          <h2
+            style={{
+              fontSize: 'clamp(1.8rem, 3.5vw, 2.5rem)',
+              color: 'var(--color-white)',
+              marginBottom: 'var(--spacing-sm)',
+            }}
+          >
+            Vous êtes pharmacien titulaire d'une officine ?
+          </h2>
+          <p
+            style={{
+              fontSize: 'var(--font-size-base)',
+              color: 'rgba(255, 255, 255, 0.9)',
+              lineHeight: 'var(--line-height-relaxed)',
+              marginBottom: 'var(--spacing-xl)',
+            }}
+          >
+            Rejoignez le réseau PharmaCityTN pour renseigner vos stocks, indiquer vos horaires de garde
+            et orienter les patients vers votre établissement en toute simplicité.
+          </p>
+
+          <div
+            style={{
+              display: 'flex',
+              gap: '14px',
+              justifyContent: 'center',
+              flexWrap: 'wrap',
+            }}
+          >
+            <Link to="/register" style={{ textDecoration: 'none' }}>
+              <Button
+                variant="secondary"
+                size="lg"
+                icon={Building2}
+                style={{
+                  backgroundColor: 'var(--color-white)',
+                  color: 'var(--color-primary-dark)',
+                  boxShadow: 'var(--shadow-md)',
+                }}
+              >
+                Inscrire mon officine
+              </Button>
+            </Link>
+            <Link to="/pharmacy/dashboard" style={{ textDecoration: 'none' }}>
+              <Button
+                variant="outline"
+                size="lg"
+                style={{
+                  color: 'var(--color-white)',
+                  borderColor: 'rgba(255, 255, 255, 0.7)',
+                }}
+              >
+                Espace Pharmacien
+              </Button>
+            </Link>
+          </div>
+        </div>
+      </section>
+
+      {/* ==========================================================================
+          MODALE DE DÉTAILS DE PHARMACIE
+          ========================================================================== */}
+      {selectedPharmacy && (
+        <Modal
+          isOpen={isDetailsModalOpen}
+          onClose={() => setIsDetailsModalOpen(false)}
+          title={selectedPharmacy.name}
+          description={`${selectedPharmacy.pharmacist} • ${selectedPharmacy.city}`}
+          footer={
+            <>
+              <Button variant="ghost" onClick={() => setIsDetailsModalOpen(false)}>
+                Fermer
+              </Button>
+              <Button
+                variant="secondary"
+                icon={Search}
+                onClick={() => {
+                  setIsDetailsModalOpen(false);
+                  navigate(`/user/search?pharmacy=${encodeURIComponent(selectedPharmacy.name)}`);
+                }}
+              >
+                Voir les stocks
+              </Button>
+              <Button
+                variant="primary"
+                icon={PhoneCall}
+                onClick={(e) => handleCallPharmacy(selectedPharmacy, e)}
+              >
+                Appeler l'officine
+              </Button>
+            </>
+          }
+        >
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+            <div
+              style={{
+                padding: '12px 16px',
+                borderRadius: 'var(--radius-md)',
+                backgroundColor: 'var(--color-primary-light)',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+              }}
+            >
+              <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                <ShieldCheck size={20} color="var(--color-primary)" />
+                <span style={{ fontSize: 'var(--font-size-xs)', fontWeight: 'bold', color: 'var(--color-primary-dark)' }}>
+                  Officine Agréée Conseil de l'Ordre
+                </span>
+              </div>
+              {selectedPharmacy.isNightDuty ? (
+                <Badge variant="info">Garde de Nuit</Badge>
+              ) : selectedPharmacy.isOpen ? (
+                <Badge variant="success">Ouverte</Badge>
+              ) : (
+                <Badge variant="danger">Fermée</Badge>
+              )}
+            </div>
+
+            <div style={{ fontSize: 'var(--font-size-sm)', display: 'flex', flexDirection: 'column', gap: '10px' }}>
+              <div>
+                <strong>Adresse :</strong>
+                <p style={{ margin: '2px 0 0', color: 'var(--color-text-secondary)' }}>
+                  {selectedPharmacy.address}, {selectedPharmacy.region}
+                </p>
+              </div>
+
+              <div>
+                <strong>Horaires & Garde :</strong>
+                <p style={{ margin: '2px 0 0', color: 'var(--color-text-secondary)' }}>
+                  {selectedPharmacy.schedule}
+                </p>
+              </div>
+
+              <div>
+                <strong>Contact Téléphonique :</strong>
+                <p style={{ margin: '2px 0 0', color: 'var(--color-text-primary)', fontWeight: 'bold' }}>
+                  {selectedPharmacy.phone}
+                </p>
+              </div>
+
+              <div>
+                <strong>Services disponibles :</strong>
+                <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap', marginTop: '6px' }}>
+                  {selectedPharmacy.features.map((f) => (
+                    <Badge key={f} variant="neutral" size="sm">
+                      {f}
+                    </Badge>
+                  ))}
+                </div>
+              </div>
+            </div>
+          </div>
+        </Modal>
+      )}
     </div>
   );
 }

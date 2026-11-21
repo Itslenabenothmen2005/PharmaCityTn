@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Link, useLocation } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import {
   Menu,
   X,
@@ -12,6 +12,7 @@ import {
   UserPlus,
   Heart,
   Package,
+  HelpCircle,
 } from 'lucide-react';
 import Logo from '../common/Logo';
 import Button from '../common/Button';
@@ -25,13 +26,16 @@ import Badge from '../common/Badge';
 export default function Header({ variant = 'public' }) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const location = useLocation();
+  const navigate = useNavigate();
 
-  // Navigation selon l'espace
+  // Navigation selon l'espace public requis :
+  // - Accueil
+  // - Rechercher un médicament
+  // - Comment ça marche ?
   const publicLinks = [
     { to: '/', label: 'Accueil' },
-    { to: '/user/search', label: 'Recherche Médicaments', icon: Search },
-    { to: '/user/dashboard', label: 'Espace Citoyen', icon: User },
-    { to: '/pharmacy/dashboard', label: 'Espace Pharmacie', icon: Building2 },
+    { to: '/user/search', label: 'Rechercher un médicament', icon: Search },
+    { to: '/#how-it-works', label: 'Comment ça marche ?', icon: HelpCircle, isAnchor: true },
   ];
 
   const userLinks = [
@@ -52,9 +56,28 @@ export default function Header({ variant = 'public' }) {
     variant === 'user' ? userLinks : variant === 'pharmacy' ? pharmacyLinks : publicLinks;
 
   const isActive = (path) => {
-    if (path === '/' && location.pathname === '/') return true;
-    if (path !== '/' && location.pathname.startsWith(path)) return true;
+    if (path === '/' && location.pathname === '/' && !location.hash) return true;
+    if (path !== '/' && !path.includes('#') && location.pathname.startsWith(path)) return true;
     return false;
+  };
+
+  const handleLinkClick = (e, link) => {
+    if (link.isAnchor) {
+      e.preventDefault();
+      setMobileMenuOpen(false);
+      if (location.pathname !== '/') {
+        navigate('/#how-it-works');
+        setTimeout(() => {
+          const el = document.getElementById('how-it-works');
+          if (el) el.scrollIntoView({ behavior: 'smooth' });
+        }, 100);
+      } else {
+        const el = document.getElementById('how-it-works');
+        if (el) el.scrollIntoView({ behavior: 'smooth' });
+      }
+    } else {
+      setMobileMenuOpen(false);
+    }
   };
 
   return (
@@ -119,7 +142,7 @@ export default function Header({ variant = 'public' }) {
             height: '68px',
           }}
         >
-          {/* Logo */}
+          {/* Logo PharmaCityTN */}
           <Logo size="md" showTagline={false} />
 
           {/* Navigation Liens (Desktop) */}
@@ -137,6 +160,7 @@ export default function Header({ variant = 'public' }) {
                 <Link
                   key={link.to}
                   to={link.to}
+                  onClick={(e) => handleLinkClick(e, link)}
                   style={{
                     display: 'flex',
                     alignItems: 'center',
@@ -150,6 +174,7 @@ export default function Header({ variant = 'public' }) {
                     color: active ? 'var(--color-primary)' : 'var(--color-text-secondary)',
                     backgroundColor: active ? 'var(--color-primary-light)' : 'transparent',
                     transition: 'all var(--transition-fast)',
+                    textDecoration: 'none',
                   }}
                   onMouseEnter={(e) => {
                     if (!active) {
@@ -189,7 +214,7 @@ export default function Header({ variant = 'public' }) {
                 </Link>
                 <Link to="/register" style={{ textDecoration: 'none' }}>
                   <Button variant="primary" size="sm" icon={UserPlus}>
-                    Inscription
+                    Créer un compte
                   </Button>
                 </Link>
               </>
@@ -315,7 +340,7 @@ export default function Header({ variant = 'public' }) {
               <Link
                 key={link.to}
                 to={link.to}
-                onClick={() => setMobileMenuOpen(false)}
+                onClick={(e) => handleLinkClick(e, link)}
                 style={{
                   display: 'flex',
                   alignItems: 'center',
@@ -328,6 +353,7 @@ export default function Header({ variant = 'public' }) {
                   backgroundColor: isActive(link.to)
                     ? 'var(--color-primary-light)'
                     : 'transparent',
+                  textDecoration: 'none',
                 }}
               >
                 {link.icon && <link.icon size={18} />}
@@ -360,7 +386,7 @@ export default function Header({ variant = 'public' }) {
                 style={{ textDecoration: 'none' }}
               >
                 <Button variant="primary" size="sm" fullWidth icon={UserPlus}>
-                  Inscription
+                  Créer un compte
                 </Button>
               </Link>
             </div>
