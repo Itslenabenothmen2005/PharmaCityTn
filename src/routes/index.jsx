@@ -1,4 +1,4 @@
-import { createBrowserRouter } from 'react-router-dom';
+import { createBrowserRouter, Navigate } from 'react-router-dom';
 
 // Layouts
 import MainLayout from '../layouts/MainLayout';
@@ -24,42 +24,44 @@ import StockPage from '../pages/pharmacy/StockPage';
 import PharmacyProfilePage from '../pages/pharmacy/PharmacyProfilePage';
 
 const router = createBrowserRouter([
+  // 1. Espace Public (Pages d'accueil, login, register, 404)
   {
     path: '/',
     element: <MainLayout />,
     errorElement: <NotFoundPage />,
     children: [
-      // Routes publiques
       { index: true, element: <HomePage /> },
       { path: 'login', element: <LoginPage /> },
       { path: 'register', element: <RegisterPage /> },
-
-      // Routes utilisateur
-      {
-        path: 'user',
-        element: <UserLayout />,
-        children: [
-          { path: 'dashboard', element: <UserDashboard /> },
-          { path: 'search', element: <SearchPage /> },
-          { path: 'favorites', element: <FavoritesPage /> },
-          { path: 'notifications', element: <NotificationsPage /> },
-        ],
-      },
-
-      // Routes pharmacie
-      {
-        path: 'pharmacy',
-        element: <PharmacyLayout />,
-        children: [
-          { path: 'dashboard', element: <PharmacyDashboard /> },
-          { path: 'medicines', element: <MedicinesPage /> },
-          { path: 'stock', element: <StockPage /> },
-          { path: 'profile', element: <PharmacyProfilePage /> },
-        ],
-      },
-
-      // 404
       { path: '*', element: <NotFoundPage /> },
+    ],
+  },
+
+  // 2. Espace Citoyen / Utilisateur (Layout dédié avec son propre Header & Sidebar)
+  {
+    path: '/user',
+    element: <UserLayout />,
+    errorElement: <NotFoundPage />,
+    children: [
+      { index: true, element: <Navigate to="dashboard" replace /> },
+      { path: 'dashboard', element: <UserDashboard /> },
+      { path: 'search', element: <SearchPage /> },
+      { path: 'favorites', element: <FavoritesPage /> },
+      { path: 'notifications', element: <NotificationsPage /> },
+    ],
+  },
+
+  // 3. Espace Pharmacie (Layout dédié avec son propre Header & Sidebar)
+  {
+    path: '/pharmacy',
+    element: <PharmacyLayout />,
+    errorElement: <NotFoundPage />,
+    children: [
+      { index: true, element: <Navigate to="dashboard" replace /> },
+      { path: 'dashboard', element: <PharmacyDashboard /> },
+      { path: 'medicines', element: <MedicinesPage /> },
+      { path: 'stock', element: <StockPage /> },
+      { path: 'profile', element: <PharmacyProfilePage /> },
     ],
   },
 ]);

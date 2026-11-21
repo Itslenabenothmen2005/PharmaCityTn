@@ -1,17 +1,24 @@
+import React from 'react';
 import { Link } from 'react-router-dom';
+import { FileQuestion, Home } from 'lucide-react';
+import EmptyState from '../../components/common/EmptyState';
+import Button from '../../components/common/Button';
 
-function NotFoundPage() {
+export default function NotFoundPage() {
   return (
-    <div style={{ textAlign: 'center', padding: '100px 20px' }}>
-      <h1 style={{ fontSize: '72px', margin: '0 0 16px', color: '#0ea5e9' }}>404</h1>
-      <p style={{ fontSize: '20px', color: '#6b7280', marginBottom: '30px' }}>
-        Page introuvable
-      </p>
-      <Link to="/" style={{ color: '#0ea5e9', fontSize: '16px' }}>
-        ← Retour à l'accueil
-      </Link>
+    <div className="container" style={{ padding: '80px 20px', maxWidth: '600px' }}>
+      <EmptyState
+        icon={FileQuestion}
+        title="Page non trouvée (404)"
+        description="La page que vous recherchez n'existe pas ou a été déplacée. Vérifiez l'adresse ou retournez à l'accueil."
+        action={
+          <Link to="/" style={{ textDecoration: 'none' }}>
+            <Button variant="primary" icon={Home}>
+              Retour à l'accueil
+            </Button>
+          </Link>
+        }
+      />
     </div>
   );
 }
-
-export default NotFoundPage;
