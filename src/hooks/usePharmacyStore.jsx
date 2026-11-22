@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
 import { mockStockMedicines, mockStockHistory } from '../data/pharmacyStock';
+import { notificationService } from '../services/notificationService';
 
 const STOCK_STORAGE_KEY = 'pharmacytn_stock_v2';
 const HISTORY_STORAGE_KEY = 'pharmacytn_history_v2';
@@ -146,6 +147,39 @@ export function PharmacyProvider({ children }) {
 
       setHistory((prev) => [newHistoryItem, ...prev]);
 
+      // 3. Déclenchement automatique d'alerte si le médicament est en favori citoyen
+      if (oldStatus !== newStatus) {
+        try {
+          const rawFavs = localStorage.getItem('pharmacity_user_favorites');
+          const favs = rawFavs ? JSON.parse(rawFavs) : [];
+          const isFav =
+            favs.includes(targetMed.id) ||
+            favs.some(
+              (fid) =>
+                targetMed.name.toLowerCase().includes('doliprane') && fid === 'med-1' ||
+                targetMed.name.toLowerCase().includes('augmentin') && fid === 'med-2' ||
+                targetMed.name.toLowerCase().includes('maxilase') && fid === 'med-3' ||
+                targetMed.name.toLowerCase().includes('inexium') && fid === 'med-4' ||
+                targetMed.name.toLowerCase().includes('panadol') && fid === 'med-5' ||
+                targetMed.name.toLowerCase().includes('ventoline') && fid === 'med-6' ||
+                targetMed.name.toLowerCase().includes('spasfon') && fid === 'med-7' ||
+                targetMed.name.toLowerCase().includes('metformine') && fid === 'med-8'
+            );
+
+          if (isFav) {
+            notificationService.notifyFavoriteAvailabilityChange(
+              targetMed.id,
+              targetMed.name,
+              oldStatus,
+              newStatus,
+              'Pharmacie Centrale Tunis'
+            );
+          }
+        } catch (e) {
+          console.error('Erreur diffusion alerte favori', e);
+        }
+      }
+
       return {
         medicine: targetMed,
         oldQuantity,
@@ -224,6 +258,39 @@ export function PharmacyProvider({ children }) {
       };
 
       setHistory((prev) => [newHistoryItem, ...prev]);
+
+      // 3. Déclenchement automatique d'alerte si le médicament est en favori citoyen
+      if (oldStatus !== newStatus) {
+        try {
+          const rawFavs = localStorage.getItem('pharmacity_user_favorites');
+          const favs = rawFavs ? JSON.parse(rawFavs) : [];
+          const isFav =
+            favs.includes(targetMed.id) ||
+            favs.some(
+              (fid) =>
+                targetMed.name.toLowerCase().includes('doliprane') && fid === 'med-1' ||
+                targetMed.name.toLowerCase().includes('augmentin') && fid === 'med-2' ||
+                targetMed.name.toLowerCase().includes('maxilase') && fid === 'med-3' ||
+                targetMed.name.toLowerCase().includes('inexium') && fid === 'med-4' ||
+                targetMed.name.toLowerCase().includes('panadol') && fid === 'med-5' ||
+                targetMed.name.toLowerCase().includes('ventoline') && fid === 'med-6' ||
+                targetMed.name.toLowerCase().includes('spasfon') && fid === 'med-7' ||
+                targetMed.name.toLowerCase().includes('metformine') && fid === 'med-8'
+            );
+
+          if (isFav) {
+            notificationService.notifyFavoriteAvailabilityChange(
+              targetMed.id,
+              targetMed.name,
+              oldStatus,
+              newStatus,
+              'Pharmacie Centrale Tunis'
+            );
+          }
+        } catch (e) {
+          console.error('Erreur diffusion alerte favori', e);
+        }
+      }
     },
     [stock]
   );

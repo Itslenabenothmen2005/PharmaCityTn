@@ -1,30 +1,48 @@
 import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
-import { User, Mail, Lock, Building2, UserPlus, ArrowLeft } from 'lucide-react';
+import { Link, useNavigate } from 'react-router-dom';
+import { User, Mail, Lock, Building2, UserPlus, ArrowLeft, Store } from 'lucide-react';
 import Card from '../../components/common/Card';
 import Input from '../../components/common/Input';
 import Button from '../../components/common/Button';
 import Logo from '../../components/common/Logo';
 import { useToast } from '../../hooks/useToast';
+import { userService } from '../../services/userService';
 
 export default function RegisterPage() {
+  const navigate = useNavigate();
+  const toast = useToast();
+
   const [role, setRole] = useState('user');
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
-  const toast = useToast();
 
   const handleSubmit = (e) => {
     e.preventDefault();
+    if (!name.trim() || !email.trim() || !password.trim()) {
+      toast.error('Veuillez remplir tous les champs obligatoires.', 'Erreur');
+      return;
+    }
+
     setLoading(true);
     setTimeout(() => {
       setLoading(false);
-      toast.success(
-        `Inscription simulée (${role === 'pharmacy' ? 'Compte Pharmacie' : 'Compte Citoyen'})`,
-        'Succès'
-      );
-    }, 600);
+      if (role === 'pharmacy') {
+        toast.success(
+          `Compte Officine « ${name} » créé avec succès ! Bienvenue sur le portail professionnel.`,
+          'Inscription réussie'
+        );
+        navigate('/pharmacy/dashboard');
+      } else {
+        userService.updateProfile({ name, email });
+        toast.success(
+          `Bienvenue sur PharmaCityTN, ${name} ! Votre compte citoyen est actif.`,
+          'Inscription réussie'
+        );
+        navigate('/user/dashboard');
+      }
+    }, 450);
   };
 
   return (

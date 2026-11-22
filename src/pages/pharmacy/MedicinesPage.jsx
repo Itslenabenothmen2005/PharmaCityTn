@@ -24,6 +24,7 @@ import Button from '../../components/common/Button';
 import SearchBar from '../../components/common/SearchBar';
 import EmptyState from '../../components/common/EmptyState';
 import MedicineFormModal from '../../components/pharmacy/MedicineFormModal';
+import ConfirmModal from '../../components/common/ConfirmModal';
 import { usePharmacyStore } from '../../hooks/usePharmacyStore';
 import { useToast } from '../../hooks/useToast';
 
@@ -42,6 +43,7 @@ export default function MedicinesPage() {
   // État de la modale d'ajout / édition
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingMedicine, setEditingMedicine] = useState(null);
+  const [deletingMedicine, setDeletingMedicine] = useState(null);
 
   // Tri
   const [sortField, setSortField] = useState('name');
@@ -122,10 +124,15 @@ export default function MedicinesPage() {
     setIsModalOpen(false);
   };
 
-  const handleDelete = (id, name) => {
-    if (window.confirm(`Confirmez-vous la suppression de « ${name} » du catalogue de votre officine ?`)) {
-      deleteMedicine(id);
-      toast.info(`La référence « ${name} » a été retirée du catalogue.`, 'Suppression');
+  const handleDelete = (med) => {
+    setDeletingMedicine(med);
+  };
+
+  const handleConfirmDelete = () => {
+    if (deletingMedicine) {
+      deleteMedicine(deletingMedicine.id);
+      toast.info(`La référence « ${deletingMedicine.name} » a été retirée du catalogue.`, 'Suppression');
+      setDeletingMedicine(null);
     }
   };
 
@@ -433,7 +440,7 @@ export default function MedicinesPage() {
                         </button>
                         <button
                           type="button"
-                          onClick={() => handleDelete(med.id, med.name)}
+                          onClick={() => handleDelete(med)}
                           style={{
                             padding: '6px',
                             borderRadius: 'var(--radius-md)',
@@ -557,6 +564,18 @@ export default function MedicinesPage() {
         onClose={() => setIsModalOpen(false)}
         onSubmit={handleFormSubmit}
         initialData={editingMedicine}
+      />
+
+      {/* Modale de confirmation avant suppression */}
+      <ConfirmModal
+        isOpen={Boolean(deletingMedicine)}
+        onClose={() => setDeletingMedicine(null)}
+        onConfirm={handleConfirmDelete}
+        title="Retirer ce médicament du catalogue ?"
+        message={`Confirmez-vous le retrait définitif de « ${deletingMedicine?.name} » (${deletingMedicine?.dosage}) ? Cette référence ne sera plus visible par les patients.`}
+        confirmLabel="Oui, supprimer"
+        cancelLabel="Annuler"
+        variant="danger"
       />
     </div>
   );

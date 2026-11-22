@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { mockMedicines } from '../data/medicines';
 import { mockRequests } from '../data/orders';
+import { medicineService } from '../services/medicineService';
 
 const UserStoreContext = createContext(null);
 
@@ -140,6 +141,19 @@ export function UserStoreProvider({ children }) {
     } catch {}
   }, [notifications]);
 
+  // Écoute des mises à jour émises par notificationService (ex: alertes favoris déclenchées en officine)
+  useEffect(() => {
+    const handleNotifUpdate = (e) => {
+      if (e.detail && Array.isArray(e.detail)) {
+        setNotifications(e.detail);
+      }
+    };
+    window.addEventListener('pharmacity:notifications-updated', handleNotifUpdate);
+    return () => {
+      window.removeEventListener('pharmacity:notifications-updated', handleNotifUpdate);
+    };
+  }, []);
+
   useEffect(() => {
     try {
       localStorage.setItem('pharmacity_user_requests', JSON.stringify(requests));
@@ -260,10 +274,11 @@ export function UserStoreProvider({ children }) {
 
   const getRequestById = (id) => requests.find((r) => r.id === id);
 
-  // Objets complets résolus
-  const favoriteMedicines = mockMedicines.filter((m) => favoriteIds.includes(m.id));
+  // Objets complets résolus depuis le service local
+  const allMeds = medicineService.getMedicines();
+  const favoriteMedicines = allMeds.filter((m) => favoriteIds.includes(m.id));
   const recentMedicines = recentViewIds
-    .map((id) => mockMedicines.find((m) => m.id === id))
+    .map((id) => allMeds.find((m) => m.id === id))
     .filter(Boolean);
 
   const unreadCount = notifications.filter((n) => !n.read).length;

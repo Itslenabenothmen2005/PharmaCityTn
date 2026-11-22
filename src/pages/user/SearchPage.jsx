@@ -17,6 +17,7 @@ import Button from '../../components/common/Button';
 import EmptyState from '../../components/common/EmptyState';
 import MedicineCard from '../../components/user/MedicineCard';
 import MedicineDetailsModal from '../../components/user/MedicineDetailsModal';
+import { medicineService } from '../../services/medicineService';
 import { mockMedicines } from '../../data/medicines';
 
 export default function SearchPage() {
@@ -40,16 +41,18 @@ export default function SearchPage() {
     }
   }, [searchParams]);
 
+  const allMedicines = useMemo(() => medicineService.getMedicines(), []);
+
   // Extraction dynamique des filtres disponibles dans les données
   const dosagesList = useMemo(() => {
-    const set = new Set(mockMedicines.map((m) => m.dosage));
+    const set = new Set(allMedicines.map((m) => m.dosage));
     return ['all', ...Array.from(set)];
-  }, []);
+  }, [allMedicines]);
 
   const formsList = useMemo(() => {
-    const set = new Set(mockMedicines.map((m) => m.form));
+    const set = new Set(allMedicines.map((m) => m.form));
     return ['all', ...Array.from(set)];
-  }, []);
+  }, [allMedicines]);
 
   const citiesList = ['all', 'Tunis', 'Ariana', 'Sousse', 'Sfax', 'Nabeul'];
 
@@ -57,7 +60,7 @@ export default function SearchPage() {
   const filteredMedicines = useMemo(() => {
     const cleanQuery = query.trim().toLowerCase();
 
-    return mockMedicines.filter((med) => {
+    return allMedicines.filter((med) => {
       // 1. Recherche texte (Nom commercial, DCI, Dosage, Forme)
       if (cleanQuery) {
         const matchesName = med.name.toLowerCase().includes(cleanQuery);
