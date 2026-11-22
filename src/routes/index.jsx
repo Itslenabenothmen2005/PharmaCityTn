@@ -24,6 +24,8 @@ import RequestsTrackingPage from '../pages/user/RequestsTrackingPage';
 import PharmacyDashboard from '../pages/pharmacy/PharmacyDashboard';
 import MedicinesPage from '../pages/pharmacy/MedicinesPage';
 import StockPage from '../pages/pharmacy/StockPage';
+import AvailabilityPage from '../pages/pharmacy/AvailabilityPage';
+import HistoryPage from '../pages/pharmacy/HistoryPage';
 import PharmacyProfilePage from '../pages/pharmacy/PharmacyProfilePage';
 
 const router = createBrowserRouter([
@@ -67,6 +69,8 @@ const router = createBrowserRouter([
       { path: 'dashboard', element: <PharmacyDashboard /> },
       { path: 'medicines', element: <MedicinesPage /> },
       { path: 'stock', element: <StockPage /> },
+      { path: 'availability', element: <AvailabilityPage /> },
+      { path: 'history', element: <HistoryPage /> },
       { path: 'profile', element: <PharmacyProfilePage /> },
     ],
   },
