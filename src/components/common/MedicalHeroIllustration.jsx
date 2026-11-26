@@ -1,5 +1,5 @@
 import React from 'react';
-import { Pill, CheckCircle2, ShieldCheck, MapPin, Clock, HeartPulse } from 'lucide-react';
+import { Pill, ShieldCheck, MapPin, Clock, HeartPulse } from 'lucide-react';
 import Badge from './Badge';
 
 /**

@@ -7,10 +7,8 @@ import {
   Calendar,
   Building2,
   Save,
-  CheckCircle2,
   ShieldCheck,
   RotateCcw,
-  BellRing,
 } from 'lucide-react';
 import Card from '../../components/common/Card';
 import Input from '../../components/common/Input';
@@ -18,10 +16,12 @@ import Button from '../../components/common/Button';
 import Badge from '../../components/common/Badge';
 import { useUserStore } from '../../hooks/useUserStore';
 import { useToast } from '../../hooks/useToast';
+import { useLanguage } from '../../context/LanguageContext';
 
 export default function UserProfilePage() {
   const { profile, updateProfile } = useUserStore();
   const toast = useToast();
+  const { language, isRtl, t } = useLanguage();
 
   const [formData, setFormData] = useState({ ...profile });
   const [loading, setLoading] = useState(false);
@@ -66,19 +66,19 @@ export default function UserProfilePage() {
       >
         <div>
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '4px' }}>
-            <h1 style={{ fontSize: 'var(--font-size-2xl)', margin: 0 }}>Mon Profil Citoyen</h1>
+            <h1 style={{ fontSize: 'var(--font-size-2xl)', margin: 0 }}>{t('profile.title')}</h1>
             <Badge variant="success" size="sm" dot>
-              Compte Actif
+              {t('profile.active')}
             </Badge>
           </div>
           <p style={{ color: 'var(--color-text-secondary)', fontSize: 'var(--font-size-sm)', margin: 0 }}>
-            Gérez vos coordonnées de contact et configurez votre officine de référence en Tunisie.
+            {t('profile.subtitle')}
           </p>
         </div>
 
         {hasChanges && (
           <Badge variant="warning" size="sm">
-            Modifications non enregistrées
+            {language === 'ar' ? 'تعديلات غير محفوظة' : 'Modifications non enregistrées'}
           </Badge>
         )}
       </div>
@@ -94,13 +94,13 @@ export default function UserProfilePage() {
         {/* Formulaire Principal de Modification */}
         <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 'var(--spacing-lg)' }}>
           <Card
-            title="Informations Personnelles"
-            subtitle="Données de contact pour les alertes et réservations"
+            title={t('profile.personalInfo')}
+            subtitle={t('profile.personalInfoSub')}
             padding="lg"
           >
             <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
               <Input
-                label="Nom et Prénom"
+                label={t('profile.fullName')}
                 value={formData.name || ''}
                 onChange={(e) => handleChange('name', e.target.value)}
                 startIcon={<User size={18} />}
@@ -115,7 +115,7 @@ export default function UserProfilePage() {
                 }}
               >
                 <Input
-                  label="Adresse Email"
+                  label={t('profile.email')}
                   type="email"
                   value={formData.email || ''}
                   onChange={(e) => handleChange('email', e.target.value)}
@@ -124,7 +124,7 @@ export default function UserProfilePage() {
                 />
 
                 <Input
-                  label="Numéro de Téléphone (Tunisie)"
+                  label={t('profile.phone')}
                   value={formData.phone || ''}
                   onChange={(e) => handleChange('phone', e.target.value)}
                   startIcon={<Phone size={18} />}
@@ -150,7 +150,7 @@ export default function UserProfilePage() {
                       marginBottom: '6px',
                     }}
                   >
-                    Gouvernorat de résidence
+                    {t('profile.city')}
                   </label>
                   <select
                     value={formData.city || 'Tunis'}
@@ -178,7 +178,7 @@ export default function UserProfilePage() {
                 </div>
 
                 <Input
-                  label="Date de naissance"
+                  label={t('profile.birthDate')}
                   type="date"
                   value={formData.birthDate || ''}
                   onChange={(e) => handleChange('birthDate', e.target.value)}
@@ -187,7 +187,7 @@ export default function UserProfilePage() {
               </div>
 
               <Input
-                label="Adresse postale / Quartier"
+                label={t('profile.address')}
                 value={formData.address || ''}
                 onChange={(e) => handleChange('address', e.target.value)}
                 startIcon={<MapPin size={18} />}
@@ -198,17 +198,17 @@ export default function UserProfilePage() {
 
           {/* Préférences d'officine & Notifications */}
           <Card
-            title="Officine Habituelle & Alertes"
-            subtitle="Personnalisez vos préférences de surveillance des stocks"
+            title={t('profile.prefCardTitle')}
+            subtitle={t('profile.prefCardSubtitle')}
             padding="lg"
           >
             <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
               <Input
-                label="Pharmacie de référence habituelle"
+                label={t('profile.preferredPharma')}
                 value={formData.preferredPharmacy || ''}
                 onChange={(e) => handleChange('preferredPharmacy', e.target.value)}
                 startIcon={<Building2 size={18} />}
-                helperText="Vos recherches mettront cette officine en priorité lorsque le médicament y est déclaré."
+                helperText={t('profile.prefHelper')}
               />
 
               <div
@@ -222,7 +222,7 @@ export default function UserProfilePage() {
                 }}
               >
                 <div style={{ fontSize: 'var(--font-size-xs)', fontWeight: 'bold', color: 'var(--color-text-primary)' }}>
-                  Canaux de réception des alertes :
+                  {t('profile.alertChannels')}
                 </div>
 
                 <label style={{ display: 'flex', alignItems: 'center', gap: '10px', cursor: 'pointer', fontSize: 'var(--font-size-sm)' }}>
@@ -232,7 +232,7 @@ export default function UserProfilePage() {
                     onChange={(e) => handleChange('notifyEmail', e.target.checked)}
                     style={{ accentColor: 'var(--color-primary)', width: '16px', height: '16px' }}
                   />
-                  <span>M'avertir par email dès qu'un médicament favori est de nouveau disponible</span>
+                  <span>{t('profile.alertEmail')}</span>
                 </label>
 
                 <label style={{ display: 'flex', alignItems: 'center', gap: '10px', cursor: 'pointer', fontSize: 'var(--font-size-sm)' }}>
@@ -242,7 +242,7 @@ export default function UserProfilePage() {
                     onChange={(e) => handleChange('notifySms', e.target.checked)}
                     style={{ accentColor: 'var(--color-primary)', width: '16px', height: '16px' }}
                   />
-                  <span>Recevoir une alerte SMS pour les gardes de nuit urgentes</span>
+                  <span>{t('profile.alertSms')}</span>
                 </label>
               </div>
             </div>
@@ -260,11 +260,11 @@ export default function UserProfilePage() {
             >
               {hasChanges && (
                 <Button variant="ghost" type="button" icon={RotateCcw} onClick={handleReset}>
-                  Annuler
+                  {t('profile.cancelBtn')}
                 </Button>
               )}
               <Button variant="primary" type="submit" loading={loading} icon={Save}>
-                Enregistrer les modifications
+                {t('profile.saveBtn')}
               </Button>
             </div>
           </Card>
@@ -298,7 +298,7 @@ export default function UserProfilePage() {
               </p>
               <div style={{ marginTop: '8px' }}>
                 <Badge variant="primary" size="sm">
-                  Citoyen Enregistré
+                  {t('profile.registeredCitizen')}
                 </Badge>
               </div>
             </div>
@@ -314,16 +314,16 @@ export default function UserProfilePage() {
               }}
             >
               <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                <span style={{ color: 'var(--color-text-muted)' }}>Identifiant :</span>
+                <span style={{ color: 'var(--color-text-muted)' }}>{t('profile.identifier')}</span>
                 <strong>TN-CIT-88421</strong>
               </div>
               <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                <span style={{ color: 'var(--color-text-muted)' }}>Secteur :</span>
+                <span style={{ color: 'var(--color-text-muted)' }}>{t('profile.sector')}</span>
                 <strong>{formData.city || 'Tunis'}</strong>
               </div>
               <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                <span style={{ color: 'var(--color-text-muted)' }}>Officine habituelle :</span>
-                <strong>{formData.preferredPharmacy || 'Non définie'}</strong>
+                <span style={{ color: 'var(--color-text-muted)' }}>{t('profile.preferredPharma')} :</span>
+                <strong>{formData.preferredPharmacy || (language === 'ar' ? 'غير محددة' : 'Non définie')}</strong>
               </div>
             </div>
           </Card>
@@ -341,11 +341,10 @@ export default function UserProfilePage() {
           >
             <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '6px', color: 'var(--color-primary-dark)' }}>
               <ShieldCheck size={18} color="var(--color-primary)" />
-              <strong>Confidentialité & Données Médicales</strong>
+              <strong>{t('profile.privacyTitle')}</strong>
             </div>
             <p style={{ margin: 0, lineHeight: 1.5 }}>
-              PharmaCityTN ne collecte aucune ordonnance ni donnée de santé sans votre consentement.
-              Les informations de disponibilité sont transmises à titre indicatif par les pharmaciens d'officine.
+              {t('profile.privacyDesc')}
             </p>
           </div>
         </div>

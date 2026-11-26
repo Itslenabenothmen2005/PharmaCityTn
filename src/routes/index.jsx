@@ -29,7 +29,7 @@ import HistoryPage from '../pages/pharmacy/HistoryPage';
 import PharmacyProfilePage from '../pages/pharmacy/PharmacyProfilePage';
 
 const router = createBrowserRouter([
-  // 1. Espace Public (Pages d'accueil, login, register, 404)
+  // 1. Espace Public (Pages d'accueil, login, register)
   {
     path: '/',
     element: <MainLayout />,
@@ -38,7 +38,6 @@ const router = createBrowserRouter([
       { index: true, element: <HomePage /> },
       { path: 'login', element: <LoginPage /> },
       { path: 'register', element: <RegisterPage /> },
-      { path: '*', element: <NotFoundPage /> },
     ],
   },
 
@@ -73,6 +72,12 @@ const router = createBrowserRouter([
       { path: 'history', element: <HistoryPage /> },
       { path: 'profile', element: <PharmacyProfilePage /> },
     ],
+  },
+
+  // 4. Route 404 globale (attrape toutes les URLs non reconnues)
+  {
+    path: '*',
+    element: <NotFoundPage />,
   },
 ]);
 

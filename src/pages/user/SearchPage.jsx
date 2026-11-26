@@ -18,13 +18,22 @@ import EmptyState from '../../components/common/EmptyState';
 import MedicineCard from '../../components/user/MedicineCard';
 import MedicineDetailsModal from '../../components/user/MedicineDetailsModal';
 import { medicineService } from '../../services/medicineService';
-import { mockMedicines } from '../../data/medicines';
+import { useLanguage } from '../../context/LanguageContext';
 
 export default function SearchPage() {
+  const { language, isRtl, t } = useLanguage();
   const [searchParams, setSearchParams] = useSearchParams();
-  const initialQuery = searchParams.get('q') || '';
+  const urlQ = searchParams.get('q') || '';
 
-  const [query, setQuery] = useState(initialQuery);
+  const [query, setQuery] = useState(urlQ);
+  const [prevUrlQ, setPrevUrlQ] = useState(urlQ);
+
+  // Synchronisation selon le pattern React sans setState dans un useEffect
+  if (urlQ !== prevUrlQ) {
+    setPrevUrlQ(urlQ);
+    setQuery(urlQ);
+  }
+
   const [filterDosage, setFilterDosage] = useState('all');
   const [filterForm, setFilterForm] = useState('all');
   const [filterAvailability, setFilterAvailability] = useState('all');
@@ -32,14 +41,6 @@ export default function SearchPage() {
 
   const [selectedMedicine, setSelectedMedicine] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
-
-  // Synchronisation avec les paramètres URL
-  useEffect(() => {
-    const q = searchParams.get('q');
-    if (q !== null && q !== query) {
-      setQuery(q);
-    }
-  }, [searchParams]);
 
   const allMedicines = useMemo(() => medicineService.getMedicines(), []);
 
@@ -99,7 +100,7 @@ export default function SearchPage() {
 
       return true;
     });
-  }, [query, filterDosage, filterForm, filterAvailability, filterCity]);
+  }, [allMedicines, query, filterDosage, filterForm, filterAvailability, filterCity]);
 
   const hasActiveFilters =
     Boolean(query) ||
@@ -139,14 +140,14 @@ export default function SearchPage() {
       <div>
         <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '4px' }}>
           <h1 style={{ fontSize: 'var(--font-size-2xl)', margin: 0 }}>
-            Recherche de Médicaments en Tunisie
+            {t('search.title')}
           </h1>
           <Badge variant="primary" size="sm">
-            Temps Réel
+            {t('search.badge')}
           </Badge>
         </div>
         <p style={{ color: 'var(--color-text-secondary)', fontSize: 'var(--font-size-sm)', margin: 0 }}>
-          Recherchez par nom commercial, principe actif (DCI), dosage ou forme galénique dans le réseau d'officines.
+          {t('search.subtitle')}
         </p>
       </div>
 
@@ -164,9 +165,7 @@ export default function SearchPage() {
       >
         <Info size={18} color="var(--color-warning-dark)" style={{ flexShrink: 0, marginTop: '2px' }} />
         <div style={{ fontSize: '0.8125rem', color: 'var(--color-warning-text)', lineHeight: 1.45 }}>
-          <strong>Important :</strong> Les disponibilités affichées sont déclaratives de la part des officines
-          et ne constituent pas une garantie de délivrance. Les médicaments présentés ne sont en aucun cas des
-          recommandations médicales. Consultez toujours un professionnel de santé agréé.
+          {t('search.disclaimer')}
         </div>
       </div>
 
@@ -179,7 +178,7 @@ export default function SearchPage() {
           onChange={(e) => setQuery(e.target.value)}
           onSearch={handleSearchSubmit}
           size="lg"
-          placeholder="Rechercher par nom (Doliprane), DCI (Paracétamol), dosage ou forme..."
+          placeholder={t('search.placeholder')}
           suggestions={['Doliprane 1000', 'Amoxicilline', 'Augmentin', 'Panadol', 'Maxilase', 'Inexium']}
           onSelectSuggestion={(s) => handleSearchSubmit(s)}
         />
@@ -202,7 +201,7 @@ export default function SearchPage() {
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: 'var(--font-size-xs)', fontWeight: 'bold' }}>
             <Filter size={15} color="var(--color-primary)" />
-            <span>Filtrer les résultats de recherche</span>
+            <span>{t('search.filterTitle')}</span>
           </div>
 
           {hasActiveFilters && (
@@ -222,7 +221,7 @@ export default function SearchPage() {
               }}
             >
               <RotateCcw size={13} />
-              Réinitialiser les filtres
+              {t('search.resetFilters')}
             </button>
           )}
         </div>
@@ -237,13 +236,13 @@ export default function SearchPage() {
         >
           {/* Filtre Dosage */}
           <div>
-            <label style={filterLabelStyle}>Dosage</label>
+            <label style={filterLabelStyle}>{t('search.dosage')}</label>
             <select
               value={filterDosage}
               onChange={(e) => setFilterDosage(e.target.value)}
               style={selectStyle}
             >
-              <option value="all">Tous les dosages</option>
+              <option value="all">{t('search.allDosages')}</option>
               {dosagesList
                 .filter((d) => d !== 'all')
                 .map((d) => (
@@ -256,13 +255,13 @@ export default function SearchPage() {
 
           {/* Filtre Forme pharmaceutique */}
           <div>
-            <label style={filterLabelStyle}>Forme pharmaceutique</label>
+            <label style={filterLabelStyle}>{t('search.form')}</label>
             <select
               value={filterForm}
               onChange={(e) => setFilterForm(e.target.value)}
               style={selectStyle}
             >
-              <option value="all">Toutes les formes</option>
+              <option value="all">{t('search.allForms')}</option>
               {formsList
                 .filter((f) => f !== 'all')
                 .map((f) => (
@@ -275,28 +274,28 @@ export default function SearchPage() {
 
           {/* Filtre Disponibilité */}
           <div>
-            <label style={filterLabelStyle}>Disponibilité</label>
+            <label style={filterLabelStyle}>{t('search.availability')}</label>
             <select
               value={filterAvailability}
               onChange={(e) => setFilterAvailability(e.target.value)}
               style={selectStyle}
             >
-              <option value="all">Toutes disponibilités</option>
-              <option value="available">🟢 Disponible en stock</option>
-              <option value="low-stock">🟠 Stock faible</option>
-              <option value="out-of-stock">🔴 Rupture signalée</option>
+              <option value="all">{t('search.allAvailabilities')}</option>
+              <option value="available">🟢 {t('status.available')}</option>
+              <option value="low-stock">🟠 {t('status.lowStock')}</option>
+              <option value="out-of-stock">🔴 {t('status.outOfStock')}</option>
             </select>
           </div>
 
           {/* Filtre Ville */}
           <div>
-            <label style={filterLabelStyle}>Ville / Gouvernorat</label>
+            <label style={filterLabelStyle}>{t('search.city')}</label>
             <select
               value={filterCity}
               onChange={(e) => setFilterCity(e.target.value)}
               style={selectStyle}
             >
-              <option value="all">Toutes les villes</option>
+              <option value="all">{t('search.allCities')}</option>
               {citiesList
                 .filter((c) => c !== 'all')
                 .map((c) => (
@@ -324,17 +323,31 @@ export default function SearchPage() {
         }}
       >
         <div>
-          Résultats : <strong>{filteredMedicines.length}</strong> médicament(s) trouvé(s)
-          {query && (
-            <span>
-              {' '}
-              pour « <strong>{query}</strong> »
-            </span>
+          {language === 'ar' ? (
+            <>
+              <strong>{filteredMedicines.length}</strong> {t('search.resultsCount')}
+              {query && (
+                <span>
+                  {' '}
+                  عن « <strong>{query}</strong> »
+                </span>
+              )}
+            </>
+          ) : (
+            <>
+              Résultats : <strong>{filteredMedicines.length}</strong> médicament(s) trouvé(s)
+              {query && (
+                <span>
+                  {' '}
+                  pour « <strong>{query}</strong> »
+                </span>
+              )}
+            </>
           )}
         </div>
 
         <div style={{ fontSize: 'var(--font-size-xs)', color: 'var(--color-text-muted)' }}>
-          Données déclaratives vérifiées
+          {language === 'ar' ? 'بيانات تصريحية معتمدة' : 'Données déclaratives vérifiées'}
         </div>
       </div>
 
@@ -360,11 +373,15 @@ export default function SearchPage() {
       ) : (
         <EmptyState
           icon={Search}
-          title="Aucun médicament ne correspond à vos critères"
-          description="Vérifiez l'orthographe du nom ou du principe actif (DCI), ou réinitialisez les filtres de dosage, forme ou ville."
+          title={t('search.noResults')}
+          description={
+            language === 'ar'
+              ? 'تأكد من كتابة الاسم أو المادة الفعالة بشكل صحيح، أو قم بإعادة ضبط خيارات التصفية.'
+              : "Vérifiez l'orthographe du nom ou du principe actif (DCI), ou réinitialisez les filtres de dosage, forme ou ville."
+          }
           action={
             <Button variant="secondary" icon={RotateCcw} onClick={handleResetFilters}>
-              Réinitialiser tous les filtres
+              {t('search.resetFilters')}
             </Button>
           }
         />

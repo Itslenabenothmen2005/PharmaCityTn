@@ -6,19 +6,16 @@ import {
   PhoneCall,
   Clock,
   MapPin,
-  AlertCircle,
-  ShieldCheck,
   Building2,
   FileText,
-  BadgeAlert,
   Info,
-  ArrowRight,
 } from 'lucide-react';
 import Modal from '../common/Modal';
 import Button from '../common/Button';
 import Badge from '../common/Badge';
 import { useUserStore } from '../../hooks/useUserStore';
 import { useToast } from '../../hooks/useToast';
+import { useLanguage } from '../../context/LanguageContext';
 
 /**
  * Modale complète de détails d'un médicament et des officines déclarantes
@@ -27,6 +24,7 @@ export default function MedicineDetailsModal({ isOpen, onClose, medicine }) {
   const navigate = useNavigate();
   const { isFavorite, toggleFavorite } = useUserStore();
   const toast = useToast();
+  const { language, isRtl, t } = useLanguage();
 
   if (!medicine) return null;
 
@@ -35,14 +33,23 @@ export default function MedicineDetailsModal({ isOpen, onClose, medicine }) {
   const handleToggleFavorite = () => {
     toggleFavorite(medicine);
     if (!favorite) {
-      toast.success(`${medicine.name} ajouté à vos favoris`, 'Favoris');
+      toast.success(
+        language === 'ar' ? `تمت إضافة ${medicine.name} إلى المفضلة` : `${medicine.name} ajouté à vos favoris`,
+        language === 'ar' ? 'المفضلة' : 'Favoris'
+      );
     } else {
-      toast.info(`${medicine.name} retiré de vos favoris`, 'Favoris');
+      toast.info(
+        language === 'ar' ? `تم حذف ${medicine.name} من المفضلة` : `${medicine.name} retiré de vos favoris`,
+        language === 'ar' ? 'المفضلة' : 'Favoris'
+      );
     }
   };
 
   const handleCallPharmacy = (pharma) => {
-    toast.info(`Appel vers ${pharma.name} (${pharma.phone})`, 'Contact Pharmacie');
+    toast.info(
+      language === 'ar' ? `جاري الاتصال بـ ${pharma.name}` : `Appel vers ${pharma.name} (${pharma.phone})`,
+      language === 'ar' ? 'الاتصال بالصيدلية' : 'Contact Pharmacie'
+    );
     window.location.href = `tel:${pharma.phone.replace(/\s+/g, '')}`;
   };
 
@@ -85,7 +92,7 @@ export default function MedicineDetailsModal({ isOpen, onClose, medicine }) {
       footer={
         <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', alignItems: 'center', justifyContent: 'flex-end', width: '100%' }}>
           <Button variant="ghost" onClick={onClose}>
-            Fermer
+            {t('medicine.close')}
           </Button>
           <Button
             variant={favorite ? 'secondary' : 'outline'}
@@ -96,14 +103,14 @@ export default function MedicineDetailsModal({ isOpen, onClose, medicine }) {
               borderColor: favorite ? '#FCA5A5' : undefined,
             }}
           >
-            {favorite ? 'Retirer des favoris' : 'Favoris'}
+            {favorite ? t('medicine.removeFav') : t('medicine.addFav')}
           </Button>
           <Button
             variant="primary"
             icon={FileText}
             onClick={() => handleStartRequest()}
           >
-            Faire une demande de retrait
+            {t('medicine.makeRequest')}
           </Button>
         </div>
       }
@@ -123,10 +130,7 @@ export default function MedicineDetailsModal({ isOpen, onClose, medicine }) {
         >
           <Info size={20} color="var(--color-warning-dark)" style={{ flexShrink: 0, marginTop: '2px' }} />
           <div style={{ fontSize: '0.8125rem', color: 'var(--color-warning-text)', lineHeight: 1.45 }}>
-            <strong>Avertissement déontologique :</strong> Les disponibilités affichées sont déclaratives
-            par les officines partenaires et ne constituent pas une garantie absolue de délivrance.
-            Cette fiche technique n'est pas une recommandation thérapeutique. Ne modifiez jamais votre
-            traitement sans l'avis d'un médecin ou d'un pharmacien.
+            <strong>{language === 'ar' ? 'تنبيه صحي وقانوني :' : 'Avertissement déontologique :'}</strong> {t('legal.disclaimer')}
           </div>
         </div>
 
@@ -144,7 +148,7 @@ export default function MedicineDetailsModal({ isOpen, onClose, medicine }) {
         >
           <div>
             <span style={{ fontSize: '11px', color: 'var(--color-text-muted)', textTransform: 'uppercase' }}>
-              Principe Actif (DCI)
+              {language === 'ar' ? 'المادة الفعالة (DCI)' : 'Principe Actif (DCI)'}
             </span>
             <div style={{ fontSize: '14px', fontWeight: '600', color: 'var(--color-text-primary)' }}>
               {medicine.dci}
@@ -153,7 +157,7 @@ export default function MedicineDetailsModal({ isOpen, onClose, medicine }) {
 
           <div>
             <span style={{ fontSize: '11px', color: 'var(--color-text-muted)', textTransform: 'uppercase' }}>
-              Dosage & Forme
+              {language === 'ar' ? 'الجرعة والشكل' : 'Dosage & Forme'}
             </span>
             <div style={{ fontSize: '14px', fontWeight: '600', color: 'var(--color-text-primary)' }}>
               {medicine.dosage} • {medicine.form}
@@ -162,7 +166,7 @@ export default function MedicineDetailsModal({ isOpen, onClose, medicine }) {
 
           <div>
             <span style={{ fontSize: '11px', color: 'var(--color-text-muted)', textTransform: 'uppercase' }}>
-              Tarif conventionné
+              {language === 'ar' ? 'السعر التعاقدي' : 'Tarif conventionné'}
             </span>
             <div style={{ fontSize: '14px', fontWeight: 'bold', color: 'var(--color-primary-dark)' }}>
               {medicine.price}
@@ -171,16 +175,16 @@ export default function MedicineDetailsModal({ isOpen, onClose, medicine }) {
 
           <div>
             <span style={{ fontSize: '11px', color: 'var(--color-text-muted)', textTransform: 'uppercase' }}>
-              Condition de délivrance
+              {language === 'ar' ? 'شروط الصرف' : 'Condition de délivrance'}
             </span>
             <div>
               {medicine.prescriptionRequired ? (
                 <Badge variant="warning" size="sm">
-                  Ordonnance requise
+                  {t('medicine.prescription')}
                 </Badge>
               ) : (
                 <Badge variant="neutral" size="sm">
-                  Sans ordonnance
+                  {t('medicine.noPrescription')}
                 </Badge>
               )}
             </div>
@@ -205,10 +209,12 @@ export default function MedicineDetailsModal({ isOpen, onClose, medicine }) {
                 margin: 0,
               }}
             >
-              Pharmacies déclarant posséder ce médicament ({medicine.pharmaciesList?.length || 0})
+              {language === 'ar'
+                ? `الصيدليات المصرحة بوجود الدواء (${medicine.pharmaciesList?.length || 0})`
+                : `Pharmacies déclarant posséder ce médicament (${medicine.pharmaciesList?.length || 0})`}
             </h4>
             <span style={{ fontSize: '0.75rem', color: 'var(--color-text-muted)' }}>
-              Données déclaratives transmises par les officines
+              {language === 'ar' ? 'بيانات تصريحية من الصيدليات' : 'Données déclaratives transmises par les officines'}
             </span>
           </div>
 
@@ -298,7 +304,7 @@ export default function MedicineDetailsModal({ isOpen, onClose, medicine }) {
                   >
                     <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
                       <Clock size={13} />
-                      <span>Mis à jour : {pharma.lastUpdated}</span>
+                      <span>{language === 'ar' ? `آخر تحديث : ${pharma.lastUpdated}` : `Mis à jour : ${pharma.lastUpdated}`}</span>
                     </div>
 
                     <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
@@ -308,7 +314,7 @@ export default function MedicineDetailsModal({ isOpen, onClose, medicine }) {
                         icon={PhoneCall}
                         onClick={() => handleCallPharmacy(pharma)}
                       >
-                        Appeler ({pharma.phone})
+                        {language === 'ar' ? 'اتصال' : 'Appeler'} ({pharma.phone})
                       </Button>
                       <Button
                         variant="secondary"
@@ -316,7 +322,7 @@ export default function MedicineDetailsModal({ isOpen, onClose, medicine }) {
                         icon={FileText}
                         onClick={() => handleStartRequest(pharma.id)}
                       >
-                        Demander ici
+                        {language === 'ar' ? 'حجز هنا' : 'Demander ici'}
                       </Button>
                     </div>
                   </div>
@@ -333,7 +339,9 @@ export default function MedicineDetailsModal({ isOpen, onClose, medicine }) {
                   fontSize: '0.875rem',
                 }}
               >
-                Aucune pharmacie partenaire ne déclare actuellement ce médicament en stock dans votre secteur.
+                {language === 'ar'
+                  ? 'لا توجد حالياً أي صيدلية شريكة تصرح بوجود هذا الدواء في المخزون في منطقتك.'
+                  : 'Aucune pharmacie partenaire ne déclare actuellement ce médicament en stock dans votre secteur.'}
               </div>
             )}
           </div>

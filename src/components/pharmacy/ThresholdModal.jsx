@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Sliders, CheckCircle2, AlertCircle, Info } from 'lucide-react';
+import { CheckCircle2 } from 'lucide-react';
 import Modal from '../common/Modal';
 import Button from '../common/Button';
 import Badge from '../common/Badge';

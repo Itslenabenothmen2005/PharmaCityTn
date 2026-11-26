@@ -26,10 +26,12 @@ import Modal from '../../components/common/Modal';
 import MedicalHeroIllustration from '../../components/common/MedicalHeroIllustration';
 import { mockPharmacies } from '../../data/pharmacies';
 import { useToast } from '../../hooks/useToast';
+import { useLanguage } from '../../context/LanguageContext';
 
 export default function HomePage() {
   const navigate = useNavigate();
   const toast = useToast();
+  const { language, isRtl, t } = useLanguage();
 
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCity, setSelectedCity] = useState('all');
@@ -83,7 +85,7 @@ export default function HomePage() {
           <div
             style={{
               display: 'grid',
-              gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))',
+              gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))',
               gap: 'var(--spacing-3xl)',
               alignItems: 'center',
             }}
@@ -92,7 +94,7 @@ export default function HomePage() {
             <div style={{ maxWidth: '600px' }}>
               <div style={{ display: 'inline-flex', marginBottom: 'var(--spacing-md)' }}>
                 <Badge variant="primary" size="md" icon={<Sparkles size={14} />}>
-                  Réseau Officiel des Pharmacies en Tunisie
+                  {t('hero.badge')}
                 </Badge>
               </div>
 
@@ -106,7 +108,8 @@ export default function HomePage() {
                   marginBottom: 'var(--spacing-md)',
                 }}
               >
-                Trouvez vos médicaments <span style={{ color: 'var(--color-primary)' }}>plus facilement.</span>
+                {t('hero.title')}{' '}
+                <span style={{ color: 'var(--color-primary)' }}>{t('hero.titleHighlight')}</span>
               </h1>
 
               <p
@@ -117,8 +120,7 @@ export default function HomePage() {
                   marginBottom: 'var(--spacing-xl)',
                 }}
               >
-                Consultez la disponibilité des médicaments dans les pharmacies tunisiennes et
-                gagnez du temps dans vos recherches.
+                {t('hero.subtitle')}
               </p>
 
               {/* Barre de recherche centrale */}
@@ -128,8 +130,8 @@ export default function HomePage() {
                   onChange={(e) => setSearchQuery(e.target.value)}
                   onSearch={handleSearchSubmit}
                   size="lg"
-                  buttonText="Rechercher"
-                  placeholder="Rechercher un médicament (Doliprane, Augmentin, Maxilase)..."
+                  buttonText={t('hero.searchBtn')}
+                  placeholder={t('hero.searchPlaceholder')}
                   suggestions={['Doliprane 1000', 'Augmentin 1g', 'Maxilase', 'Panadol', 'Paracétamol']}
                   onSelectSuggestion={(s) => {
                     setSearchQuery(s);
@@ -151,11 +153,11 @@ export default function HomePage() {
               >
                 <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
                   <CheckCircle2 size={16} color="var(--color-primary)" />
-                  <span>Officines conventionnées CNAM</span>
+                  <span>{t('hero.cnam')}</span>
                 </div>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
                   <Clock size={16} color="var(--color-primary)" />
-                  <span>Gardes de jour & de nuit</span>
+                  <span>{t('hero.duty')}</span>
                 </div>
               </div>
             </div>
@@ -182,7 +184,7 @@ export default function HomePage() {
         <div className="container">
           <div style={{ textAlign: 'center', marginBottom: 'var(--spacing-3xl)' }}>
             <Badge variant="primary" size="sm">
-              Processus Simple & Transparent
+              {t('how.badge')}
             </Badge>
             <h2
               style={{
@@ -191,7 +193,7 @@ export default function HomePage() {
                 marginBottom: 'var(--spacing-xs)',
               }}
             >
-              Comment ça marche ?
+              {t('how.title')}
             </h2>
             <p
               style={{
@@ -201,7 +203,7 @@ export default function HomePage() {
                 margin: '0 auto',
               }}
             >
-              En trois étapes rapides, identifiez la pharmacie qui détient votre traitement en stock.
+              {t('how.subtitle')}
             </p>
           </div>
 
@@ -259,7 +261,7 @@ export default function HomePage() {
                     marginBottom: 'var(--spacing-xs)',
                   }}
                 >
-                  1. Recherchez votre médicament
+                  {t('how.step1.title')}
                 </h3>
 
                 <p
@@ -270,8 +272,7 @@ export default function HomePage() {
                     margin: 0,
                   }}
                 >
-                  Indiquez le nom commercial, le dosage ou la DCI de votre traitement dans la barre de
-                  recherche intuitive.
+                  {t('how.step1.desc')}
                 </p>
               </div>
             </Card>
@@ -322,7 +323,7 @@ export default function HomePage() {
                     marginBottom: 'var(--spacing-xs)',
                   }}
                 >
-                  2. Consultez les pharmacies disponibles
+                  {t('how.step2.title')}
                 </h3>
 
                 <p
@@ -333,8 +334,7 @@ export default function HomePage() {
                     margin: 0,
                   }}
                 >
-                  Accédez à la liste des officines qui disposent du produit en stock, avec leurs
-                  adresses exactes, distances et horaires de garde.
+                  {t('how.step2.desc')}
                 </p>
               </div>
             </Card>
@@ -385,7 +385,7 @@ export default function HomePage() {
                     marginBottom: 'var(--spacing-xs)',
                   }}
                 >
-                  3. Contactez la pharmacie pour confirmer
+                  {t('how.step3.title')}
                 </h3>
 
                 <p
@@ -396,8 +396,7 @@ export default function HomePage() {
                     margin: 0,
                   }}
                 >
-                  Appelez directement l’officine en un clic pour vous assurer de la disponibilité ou
-                  réserver votre médicament avant votre déplacement.
+                  {t('how.step3.desc')}
                 </p>
               </div>
             </Card>
@@ -412,7 +411,7 @@ export default function HomePage() {
         <div className="container">
           <div style={{ textAlign: 'center', marginBottom: 'var(--spacing-3xl)' }}>
             <Badge variant="neutral" size="sm">
-              Pourquoi PharmaCityTN ?
+              {t('advantages.badge')}
             </Badge>
             <h2
               style={{
@@ -421,7 +420,7 @@ export default function HomePage() {
                 marginBottom: 'var(--spacing-xs)',
               }}
             >
-              Les avantages de notre plateforme
+              {t('advantages.title')}
             </h2>
             <p
               style={{
@@ -431,7 +430,7 @@ export default function HomePage() {
                 margin: '0 auto',
               }}
             >
-              Une solution pensée pour simplifier le parcours de santé des citoyens tunisiens.
+              {t('advantages.subtitle')}
             </p>
           </div>
 
@@ -467,11 +466,10 @@ export default function HomePage() {
                   marginBottom: 'var(--spacing-xs)',
                 }}
               >
-                Recherche simplifiée
+                {t('adv.1.title')}
               </h3>
               <p style={{ fontSize: 'var(--font-size-sm)', color: 'var(--color-text-secondary)', margin: 0 }}>
-                Retrouvez vos médicaments en quelques frappes grâce à notre moteur de recherche rapide
-                avec auto-complétion et suggestions intelligentes.
+                {t('adv.1.desc')}
               </p>
             </Card>
 
@@ -500,11 +498,10 @@ export default function HomePage() {
                   marginBottom: 'var(--spacing-xs)',
                 }}
               >
-                Informations de disponibilité
+                {t('adv.2.title')}
               </h3>
               <p style={{ fontSize: 'var(--font-size-sm)', color: 'var(--color-text-secondary)', margin: 0 }}>
-                Visualisez clairement le statut des stocks (Disponible, Stock faible, Rupture)
-                mis à jour pour éviter toute mauvaise surprise.
+                {t('adv.2.desc')}
               </p>
             </Card>
 
@@ -533,11 +530,10 @@ export default function HomePage() {
                   marginBottom: 'var(--spacing-xs)',
                 }}
               >
-                Gain de temps
+                {t('adv.3.title')}
               </h3>
               <p style={{ fontSize: 'var(--font-size-sm)', color: 'var(--color-text-secondary)', margin: 0 }}>
-                Évitez de faire le tour de la ville ou d'enchaîner des appels interminables : trouvez
-                directement l'officine la plus proche qui possède votre traitement.
+                {t('adv.3.desc')}
               </p>
             </Card>
 
@@ -566,11 +562,10 @@ export default function HomePage() {
                   marginBottom: 'var(--spacing-xs)',
                 }}
               >
-                Accès aux informations des pharmacies
+                {t('adv.4.title')}
               </h3>
               <p style={{ fontSize: 'var(--font-size-sm)', color: 'var(--color-text-secondary)', margin: 0 }}>
-                Adresses géolocalisées, coordonnées téléphoniques directes, et indication précise des
-                gardes de jour et de nuit en Tunisie.
+                {t('adv.4.desc')}
               </p>
             </Card>
           </div>
@@ -601,7 +596,7 @@ export default function HomePage() {
           >
             <div>
               <Badge variant="primary" size="sm">
-                Réseau Partenaire
+                {t('pharmacies.badge')}
               </Badge>
               <h2
                 style={{
@@ -610,10 +605,10 @@ export default function HomePage() {
                   marginBottom: 'var(--spacing-2xs)',
                 }}
               >
-                Officines de pharmacie en Tunisie
+                {t('pharmacies.title')}
               </h2>
               <p style={{ fontSize: 'var(--font-size-sm)', color: 'var(--color-text-secondary)', margin: 0 }}>
-                Consultez quelques-unes des pharmacies partenaires référencées sur PharmaCityTN.
+                {t('pharmacies.subtitle')}
               </p>
             </div>
 
@@ -629,9 +624,9 @@ export default function HomePage() {
               }}
             >
               {[
-                { id: 'all', label: 'Toutes' },
-                { id: 'open', label: 'Ouvertes' },
-                { id: 'night', label: 'Garde de Nuit' },
+                { id: 'all', label: t('pharmacies.filter.all') },
+                { id: 'open', label: t('pharmacies.filter.open') },
+                { id: 'night', label: t('pharmacies.filter.night') },
                 { id: 'tunis', label: 'Tunis' },
                 { id: 'sousse', label: 'Sousse' },
                 { id: 'sfax', label: 'Sfax' },
@@ -664,7 +659,7 @@ export default function HomePage() {
           <div
             style={{
               display: 'grid',
-              gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))',
+              gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))',
               gap: 'var(--spacing-xl)',
             }}
           >

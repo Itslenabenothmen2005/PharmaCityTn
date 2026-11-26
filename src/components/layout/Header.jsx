@@ -7,17 +7,22 @@ import {
   Bell,
   User,
   ShieldCheck,
-  Building2,
   LogIn,
   UserPlus,
   Heart,
   Package,
   HelpCircle,
+  Globe,
+  FilePlus2,
+  History,
+  LogOut,
 } from 'lucide-react';
 import Logo from '../common/Logo';
 import Button from '../common/Button';
 import Badge from '../common/Badge';
 import { useUserStore } from '../../hooks/useUserStore';
+import { useToast } from '../../hooks/useToast';
+import { useLanguage } from '../../context/LanguageContext';
 
 /**
  * Composant Header Réutilisable PharmaCityTN
@@ -26,8 +31,15 @@ import { useUserStore } from '../../hooks/useUserStore';
  */
 export default function Header({ variant = 'public' }) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const { language, isRtl, switchLanguage, t } = useLanguage();
   const location = useLocation();
   const navigate = useNavigate();
+  const toast = useToast();
+
+  const handleLogout = () => {
+    toast.info(t('nav.logoutConfirm'), 'Déconnexion');
+    navigate('/');
+  };
 
   // On récupère le profil et le compteur non-lu si on est dans le UserStoreProvider
   let profile = { name: 'Ahmed Ben Salem' };
@@ -38,33 +50,34 @@ export default function Header({ variant = 'public' }) {
       profile = store.profile;
       unreadCount = store.unreadCount;
     }
-  } catch {}
+  } catch (err) {
+    void err;
+  }
 
   const getInitial = (name) => (name ? name.charAt(0).toUpperCase() : 'A');
 
-  // Navigation selon l'espace public requis :
-  // - Accueil
-  // - Rechercher un médicament
-  // - Comment ça marche ?
+  // Navigation selon l'espace requis avec traduction dynamique :
   const publicLinks = [
-    { to: '/', label: 'Accueil' },
-    { to: '/user/search', label: 'Rechercher un médicament', icon: Search },
-    { to: '/#how-it-works', label: 'Comment ça marche ?', icon: HelpCircle, isAnchor: true },
+    { to: '/', label: t('nav.home') },
+    { to: '/user/search', label: t('nav.search'), icon: Search },
+    { to: '/#how-it-works', label: t('nav.howItWorks'), icon: HelpCircle, isAnchor: true },
   ];
 
   const userLinks = [
-    { to: '/user/dashboard', label: 'Tableau de bord' },
-    { to: '/user/search', label: 'Recherche', icon: Search },
-    { to: '/user/favorites', label: 'Favoris', icon: Heart },
-    { to: '/user/notifications', label: 'Notifications', icon: Bell },
-    { to: '/user/profile', label: 'Mon Profil', icon: User },
+    { to: '/user/dashboard', label: t('nav.dashboard') },
+    { to: '/user/search', label: t('nav.searchMed'), icon: Search },
+    { to: '/user/request', label: t('nav.request'), icon: FilePlus2 },
+    { to: '/user/favorites', label: t('nav.favorites'), icon: Heart },
+    { to: '/user/notifications', label: t('nav.notifications'), icon: Bell },
+    { to: '/user/profile', label: t('nav.profile'), icon: User },
   ];
 
   const pharmacyLinks = [
-    { to: '/pharmacy/dashboard', label: 'Tableau de bord' },
-    { to: '/pharmacy/medicines', label: 'Médicaments' },
-    { to: '/pharmacy/stock', label: 'Gestion Stock', icon: Package },
-    { to: '/pharmacy/profile', label: 'Profil Officine' },
+    { to: '/pharmacy/dashboard', label: t('nav.pharma.dashboard') },
+    { to: '/pharmacy/medicines', label: t('nav.pharma.medicines') },
+    { to: '/pharmacy/stock', label: t('nav.pharma.stock'), icon: Package },
+    { to: '/pharmacy/history', label: t('nav.pharma.history'), icon: History },
+    { to: '/pharmacy/profile', label: t('nav.pharma.profile') },
   ];
 
   const navLinks =
@@ -127,20 +140,69 @@ export default function Header({ variant = 'public' }) {
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
             <span style={{ fontSize: '12px' }}>🇹🇳</span>
             <span>
-              <strong>PharmaCityTN</strong> — Réseau national des officines de pharmacie en Tunisie
+              <strong>PharmaCityTN</strong> — {t('topbar.network')}
             </span>
           </div>
 
-          <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
-            <span>Urgences médicales : <strong>190</strong></span>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
+            {/* Sélecteur de Langue RTL / LTR */}
+            <div
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                backgroundColor: 'rgba(22, 139, 112, 0.12)',
+                borderRadius: 'var(--radius-full)',
+                padding: '2px 4px',
+                gap: '2px',
+              }}
+              title="Changer la langue (Français / العربية)"
+            >
+              <Globe size={12} color="var(--color-primary-dark)" style={{ marginLeft: '4px', marginRight: '2px' }} />
+              <button
+                type="button"
+                onClick={() => switchLanguage('fr')}
+                style={{
+                  padding: '2px 7px',
+                  borderRadius: 'var(--radius-full)',
+                  fontSize: '11px',
+                  fontWeight: language === 'fr' ? '700' : '500',
+                  backgroundColor: language === 'fr' ? 'var(--color-primary)' : 'transparent',
+                  color: language === 'fr' ? '#FFFFFF' : 'var(--color-primary-dark)',
+                  border: 'none',
+                  cursor: 'pointer',
+                  transition: 'all var(--transition-fast)',
+                }}
+              >
+                FR
+              </button>
+              <button
+                type="button"
+                onClick={() => switchLanguage('ar')}
+                style={{
+                  padding: '2px 7px',
+                  borderRadius: 'var(--radius-full)',
+                  fontSize: '11px',
+                  fontWeight: language === 'ar' ? '700' : '500',
+                  backgroundColor: language === 'ar' ? 'var(--color-primary)' : 'transparent',
+                  color: language === 'ar' ? '#FFFFFF' : 'var(--color-primary-dark)',
+                  border: 'none',
+                  cursor: 'pointer',
+                  transition: 'all var(--transition-fast)',
+                }}
+              >
+                عربي
+              </button>
+            </div>
+
+            <span className="hide-on-mobile">{t('topbar.emergency')}</span>
             {variant === 'pharmacy' && (
               <Badge variant="success" size="sm" dot>
-                Mode Pharmacien
+                {t('topbar.pharmacyMode')}
               </Badge>
             )}
             {variant === 'user' && (
               <Badge variant="primary" size="sm" dot>
-                Mode Citoyen
+                {t('topbar.citizenMode')}
               </Badge>
             )}
           </div>
@@ -224,12 +286,12 @@ export default function Header({ variant = 'public' }) {
               <>
                 <Link to="/login" style={{ textDecoration: 'none' }}>
                   <Button variant="ghost" size="sm" icon={LogIn}>
-                    Connexion
+                    {t('header.login')}
                   </Button>
                 </Link>
                 <Link to="/register" style={{ textDecoration: 'none' }}>
                   <Button variant="primary" size="sm" icon={UserPlus}>
-                    Créer un compte
+                    {t('header.register')}
                   </Button>
                 </Link>
               </>
@@ -307,19 +369,58 @@ export default function Header({ variant = 'public' }) {
                     </span>
                   </div>
                 </Link>
+
+                {/* Bouton Déconnexion Directe (Citoyen) */}
+                <button
+                  type="button"
+                  onClick={handleLogout}
+                  title={t('header.logout')}
+                  aria-label={t('header.logout')}
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '4px',
+                    padding: '6px 10px',
+                    borderRadius: 'var(--radius-md)',
+                    background: '#FEE2E2',
+                    color: '#DC2626',
+                    fontSize: '11px',
+                    fontWeight: '700',
+                    border: '1px solid #FECACA',
+                    cursor: 'pointer',
+                  }}
+                >
+                  <LogOut size={14} />
+                  <span>{t('header.logout')}</span>
+                </button>
               </div>
             )}
 
             {variant === 'pharmacy' && (
               <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
                 <Badge variant="success" dot icon={<ShieldCheck size={14} />}>
-                  Pharmacie Ouverte
+                  {language === 'ar' ? 'صيدلية مفتوحة' : 'Pharmacie Ouverte'}
                 </Badge>
-                <Link to="/" style={{ textDecoration: 'none' }}>
-                  <Button variant="outline" size="sm">
-                    Quitter
-                  </Button>
-                </Link>
+                <button
+                  type="button"
+                  onClick={handleLogout}
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '6px',
+                    padding: '6px 12px',
+                    borderRadius: 'var(--radius-md)',
+                    border: '1px solid var(--color-border)',
+                    backgroundColor: 'var(--color-bg-surface)',
+                    color: '#DC2626',
+                    fontSize: '12px',
+                    fontWeight: '600',
+                    cursor: 'pointer',
+                  }}
+                >
+                  <LogOut size={14} />
+                  <span>{t('header.logout')}</span>
+                </button>
               </div>
             )}
           </div>
@@ -413,6 +514,58 @@ export default function Header({ variant = 'public' }) {
                 </Link>
               </div>
             )}
+
+            {/* Sélecteur de Langue & Direction Mobile */}
+            <div
+              style={{
+                marginTop: '12px',
+                paddingTop: '12px',
+                borderTop: '1px solid var(--color-border-subtle)',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                paddingLeft: '4px',
+                paddingRight: '4px',
+              }}
+            >
+              <span style={{ fontSize: '13px', color: 'var(--color-text-secondary)', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                <Globe size={16} /> Langue (RTL)
+              </span>
+              <div style={{ display: 'flex', gap: '4px' }}>
+                <button
+                  type="button"
+                  onClick={() => switchLanguage('fr')}
+                  style={{
+                    padding: '4px 10px',
+                    borderRadius: 'var(--radius-md)',
+                    fontSize: '12px',
+                    fontWeight: currentLang === 'fr' ? '700' : '500',
+                    backgroundColor: currentLang === 'fr' ? 'var(--color-primary)' : 'var(--color-bg-subtle)',
+                    color: currentLang === 'fr' ? '#FFFFFF' : 'var(--color-text-secondary)',
+                    border: 'none',
+                    cursor: 'pointer',
+                  }}
+                >
+                  Français
+                </button>
+                <button
+                  type="button"
+                  onClick={() => switchLanguage('ar')}
+                  style={{
+                    padding: '4px 10px',
+                    borderRadius: 'var(--radius-md)',
+                    fontSize: '12px',
+                    fontWeight: currentLang === 'ar' ? '700' : '500',
+                    backgroundColor: currentLang === 'ar' ? 'var(--color-primary)' : 'var(--color-bg-subtle)',
+                    color: currentLang === 'ar' ? '#FFFFFF' : 'var(--color-text-secondary)',
+                    border: 'none',
+                    cursor: 'pointer',
+                  }}
+                >
+                  العربية
+                </button>
+              </div>
+            </div>
           </nav>
         </div>
       )}

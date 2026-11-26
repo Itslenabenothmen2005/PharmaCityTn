@@ -170,3 +170,74 @@ ul, ol {
 .animate-pulse {
   animation: pulseSubtle 1.8s ease-in-out infinite;
 }
+
+/* ==========================================================================
+   Support Internationalisation & RTL (Arabe - العربية)
+   ========================================================================== */
+[dir="rtl"] {
+  direction: rtl;
+  font-family: var(--font-family-arabic);
+  text-align: right;
+}
+
+[dir="rtl"] body {
+  font-family: var(--font-family-arabic);
+}
+
+[dir="rtl"] .rtl-flip,
+[dir="rtl"] .lucide-chevron-right,
+[dir="rtl"] .lucide-arrow-right {
+  transform: scaleX(-1);
+}
+
+[dir="rtl"] .lucide-chevron-left,
+[dir="rtl"] .lucide-arrow-left {
+  transform: scaleX(-1);
+}
+
+/* ==========================================================================
+   Améliorations Responsive & Prévention Débordements Mobiles
+   ========================================================================== */
+img, video, canvas, svg {
+  max-width: 100%;
+  height: auto;
+}
+
+/* Conteneur de tableaux responsive standard */
+.table-responsive {
+  width: 100%;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  border-radius: var(--radius-lg);
+}
+
+/* Utilitaires d'affichage réactif */
+@media (max-width: 768px) {
+  .hide-on-mobile {
+    display: none !important;
+  }
+  
+  .full-width-mobile {
+    width: 100% !important;
+    max-width: 100% !important;
+  }
+  
+  /* Ajustements typographiques et paddings pour petits écrans */
+  h1 {
+    font-size: var(--font-size-2xl) !important;
+  }
+  h2 {
+    font-size: var(--font-size-xl) !important;
+  }
+  
+  .container {
+    padding-left: var(--spacing-sm);
+    padding-right: var(--spacing-sm);
+  }
+}
+
+@media (max-width: 480px) {
+  html {
+    font-size: 15px;
+  }
+}

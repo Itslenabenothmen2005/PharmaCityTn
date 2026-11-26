@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { X, Pill, Save, AlertCircle, CheckCircle2, ShieldAlert } from 'lucide-react';
+import { Pill, Save, AlertCircle, CheckCircle2, ShieldAlert } from 'lucide-react';
 import Modal from '../common/Modal';
 import Input from '../common/Input';
 import Button from '../common/Button';

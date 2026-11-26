@@ -9,7 +9,6 @@ import {
   Clock,
   Trash2,
   Info,
-  Search,
   Pill,
 } from 'lucide-react';
 import Badge from '../../components/common/Badge';
@@ -19,10 +18,12 @@ import MedicineDetailsModal from '../../components/user/MedicineDetailsModal';
 import { useUserStore } from '../../hooks/useUserStore';
 import { mockMedicines } from '../../data/medicines';
 import { useToast } from '../../hooks/useToast';
+import { useLanguage } from '../../context/LanguageContext';
 
 export default function NotificationsPage() {
   const navigate = useNavigate();
   const toast = useToast();
+  const { language, isRtl, t } = useLanguage();
   const { notifications, unreadCount, markAsRead, markAllAsRead, deleteNotification } =
     useUserStore();
 
@@ -69,26 +70,26 @@ export default function NotificationsPage() {
         <div>
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '4px' }}>
             <h1 style={{ fontSize: 'var(--font-size-2xl)', margin: 0 }}>
-              Alertes & Historique des Disponibilités
+              {t('notifications.title')}
             </h1>
             {unreadCount > 0 ? (
               <Badge variant="danger" size="sm" dot>
-                {unreadCount} nouvelle(s)
+                {unreadCount} {language === 'ar' ? 'جديدة' : 'nouvelle(s)'}
               </Badge>
             ) : (
               <Badge variant="success" size="sm">
-                À jour
+                {language === 'ar' ? 'محدّثة' : 'À jour'}
               </Badge>
             )}
           </div>
           <p style={{ color: 'var(--color-text-secondary)', fontSize: 'var(--font-size-sm)', margin: 0 }}>
-            Suivez les déclarations de retour en stock et les alertes d'approvisionnement des pharmacies partenaires.
+            {t('notifications.subtitle')}
           </p>
         </div>
 
         {unreadCount > 0 && (
           <Button variant="secondary" icon={CheckCheck} onClick={markAllAsRead}>
-            Tout marquer comme lu
+            {t('notifications.markAll')}
           </Button>
         )}
       </div>
@@ -109,8 +110,7 @@ export default function NotificationsPage() {
       >
         <Info size={16} color="var(--color-primary)" style={{ flexShrink: 0 }} />
         <span>
-          Les notifications sont générées à partir des déclarations volontaires des officines.
-          Veuillez toujours joindre la pharmacie par téléphone avant tout déplacement.
+          {t('legal.disclaimer')}
         </span>
       </div>
 
@@ -127,10 +127,10 @@ export default function NotificationsPage() {
         }}
       >
         {[
-          { id: 'all', label: 'Toutes les alertes', count: notifications.length },
-          { id: 'unread', label: 'Non lues', count: unreadCount },
-          { id: 'stock', label: 'Mouvements de stock' },
-          { id: 'out', label: 'Ruptures signalées' },
+          { id: 'all', label: t('notifications.all'), count: notifications.length },
+          { id: 'unread', label: t('notifications.unread'), count: unreadCount },
+          { id: 'stock', label: t('notifications.stock') },
+          { id: 'out', label: t('notifications.out') },
         ].map((tab) => (
           <button
             key={tab.id}

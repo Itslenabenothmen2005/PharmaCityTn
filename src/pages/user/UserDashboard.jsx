@@ -8,9 +8,6 @@ import {
   CheckCircle2,
   AlertTriangle,
   ArrowRight,
-  ShieldCheck,
-  Building2,
-  Sparkles,
   Info,
   ClipboardList,
   Plus,
@@ -22,9 +19,11 @@ import SearchBar from '../../components/common/SearchBar';
 import MedicineCard from '../../components/user/MedicineCard';
 import MedicineDetailsModal from '../../components/user/MedicineDetailsModal';
 import { useUserStore } from '../../hooks/useUserStore';
+import { useLanguage } from '../../context/LanguageContext';
 
 export default function UserDashboard() {
   const navigate = useNavigate();
+  const { language, isRtl, t } = useLanguage();
   const { profile, favoriteMedicines, recentMedicines, notifications, unreadCount, requests } = useUserStore();
   const [selectedMedicine, setSelectedMedicine] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -59,20 +58,20 @@ export default function UserDashboard() {
         <div>
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '4px' }}>
             <h1 style={{ fontSize: 'var(--font-size-2xl)', margin: 0 }}>
-              Bienvenue, {profile.name} 👋
+              {t('dashboard.welcome')}, {profile.name} 👋
             </h1>
             <Badge variant="primary" size="sm">
-              Espace Citoyen
+              {t('topbar.citizenMode')}
             </Badge>
           </div>
           <p style={{ color: 'var(--color-text-secondary)', fontSize: 'var(--font-size-sm)', margin: 0 }}>
-            Localisez vos médicaments et consultez les stocks déclarés dans les officines de votre secteur ({profile.city || 'Tunisie'}).
+            {t('dashboard.subtitle')}
           </p>
         </div>
 
         <Link to="/user/search" style={{ textDecoration: 'none' }}>
           <Button variant="primary" icon={Search}>
-            Nouvelle recherche
+            {language === 'ar' ? 'بحث جديد عن دواء' : 'Nouvelle recherche'}
           </Button>
         </Link>
       </div>
@@ -93,8 +92,7 @@ export default function UserDashboard() {
       >
         <Info size={16} color="var(--color-primary)" style={{ flexShrink: 0 }} />
         <span>
-          <strong>Rappel santé :</strong> Les disponibilités sont déclaratives et ne garantissent pas la délivrance.
-          Contactez l'officine pour confirmer la disponibilité avant tout déplacement.
+          <strong>{language === 'ar' ? 'تذكير صحي:' : 'Rappel santé :'}</strong> {t('legal.disclaimer')}
         </span>
       </div>
 
@@ -104,11 +102,11 @@ export default function UserDashboard() {
       <Card padding="md">
         <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
           <span style={{ fontSize: 'var(--font-size-xs)', fontWeight: 'bold', color: 'var(--color-text-primary)' }}>
-            Recherche rapide d'un médicament :
+            {t('dashboard.quickSearch')}
           </span>
           <SearchBar
             size="md"
-            placeholder="Saisissez un nom commercial (ex: Doliprane), molécule ou dosage..."
+            placeholder={t('hero.searchPlaceholder')}
             onSearch={handleQuickSearch}
             suggestions={['Doliprane 1000', 'Augmentin 1g', 'Maxilase', 'Panadol Extra', 'Inexium']}
             onSelectSuggestion={(s) => handleQuickSearch(s)}
@@ -139,9 +137,9 @@ export default function UserDashboard() {
               <Heart size={20} fill="#EF4444" />
             </div>
             <div>
-              <div style={{ fontSize: '11px', color: 'var(--color-text-secondary)' }}>Médicaments favoris</div>
+              <div style={{ fontSize: '11px', color: 'var(--color-text-secondary)' }}>{t('dashboard.favSummary')}</div>
               <strong style={{ fontSize: '20px', color: 'var(--color-text-primary)' }}>
-                {favoriteMedicines.length} {favoriteMedicines.length > 1 ? 'produits' : 'produit'}
+                {favoriteMedicines.length} {language === 'ar' ? 'أدوية' : favoriteMedicines.length > 1 ? 'produits' : 'produit'}
               </strong>
             </div>
           </div>
@@ -160,9 +158,11 @@ export default function UserDashboard() {
               <Bell size={20} />
             </div>
             <div>
-              <div style={{ fontSize: '11px', color: 'var(--color-text-secondary)' }}>Alertes disponibilité</div>
+              <div style={{ fontSize: '11px', color: 'var(--color-text-secondary)' }}>{t('dashboard.notifSummary')}</div>
               <strong style={{ fontSize: '20px', color: 'var(--color-text-primary)' }}>
-                {unreadCount > 0 ? `${unreadCount} non lues` : 'À jour'}
+                {unreadCount > 0
+                  ? (language === 'ar' ? `${unreadCount} غير مقروءة` : `${unreadCount} non lues`)
+                  : (language === 'ar' ? 'محدّثة' : 'À jour')}
               </strong>
             </div>
           </div>
@@ -181,9 +181,9 @@ export default function UserDashboard() {
               <ClipboardList size={20} />
             </div>
             <div>
-              <div style={{ fontSize: '11px', color: 'var(--color-text-secondary)' }}>Mes demandes de retrait</div>
+              <div style={{ fontSize: '11px', color: 'var(--color-text-secondary)' }}>{t('dashboard.requestSummary')}</div>
               <strong style={{ fontSize: '20px', color: 'var(--color-text-primary)' }}>
-                {requests?.length || 0} {requests?.length > 1 ? 'dossiers' : 'dossier'}
+                {requests?.length || 0} {language === 'ar' ? 'طلبات' : requests?.length > 1 ? 'dossiers' : 'dossier'}
               </strong>
             </div>
           </div>
@@ -205,7 +205,7 @@ export default function UserDashboard() {
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
             <Clock size={18} color="var(--color-primary)" />
             <h2 style={{ fontSize: 'var(--font-size-lg)', margin: 0 }}>
-              Médicaments récemment consultés
+              {t('dashboard.recentViews')}
             </h2>
           </div>
           <Link
@@ -218,7 +218,7 @@ export default function UserDashboard() {
               gap: '4px',
             }}
           >
-            Explorer tout le catalogue <ArrowRight size={14} />
+            {t('dashboard.viewAll')} <ArrowRight size={14} />
           </Link>
         </div>
 
@@ -245,7 +245,7 @@ export default function UserDashboard() {
               fontSize: 'var(--font-size-sm)',
             }}
           >
-            Aucun médicament consulté récemment. Utilisez la barre de recherche ci-dessus pour démarrer.
+            {language === 'ar' ? 'لم تقم بمراجعة أي دواء مؤخراً. ابدأ بالبحث في الشريط أعلاه.' : 'Aucun médicament consulté récemment. Utilisez la barre de recherche ci-dessus pour démarrer.'}
           </div>
         )}
       </div>
@@ -265,7 +265,7 @@ export default function UserDashboard() {
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
             <Heart size={18} color="#EF4444" fill="#EF4444" />
             <h2 style={{ fontSize: 'var(--font-size-lg)', margin: 0 }}>
-              Mes médicaments favoris ({favoriteMedicines.length})
+              {t('dashboard.favorites')} ({favoriteMedicines.length})
             </h2>
           </div>
           <Link
@@ -278,7 +278,7 @@ export default function UserDashboard() {
               gap: '4px',
             }}
           >
-            Gérer mes favoris <ArrowRight size={14} />
+            {t('dashboard.viewAll')} <ArrowRight size={14} />
           </Link>
         </div>
 
@@ -305,7 +305,9 @@ export default function UserDashboard() {
               fontSize: 'var(--font-size-sm)',
             }}
           >
-            Vous n'avez pas encore de favoris enregistrés. Cliquez sur le cœur d'un médicament pour le suivre.
+            {language === 'ar'
+              ? 'ليس لديك أدوية مفضلة مسجلة بعد. اضغط على رمز القلب لمتابعة توفر أي دواء.'
+              : "Vous n'avez pas encore de favoris enregistrés. Cliquez sur le cœur d'un médicament pour le suivre."}
           </div>
         )}
       </div>
@@ -325,7 +327,7 @@ export default function UserDashboard() {
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
             <ClipboardList size={18} color="var(--color-primary)" />
             <h2 style={{ fontSize: 'var(--font-size-lg)', margin: 0 }}>
-              Mes demandes de retrait en pharmacie
+              {language === 'ar' ? 'طلبات استلام الأدوية في الصيدليات' : 'Mes demandes de retrait en pharmacie'}
             </h2>
           </div>
           <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
@@ -340,7 +342,7 @@ export default function UserDashboard() {
                 color: 'var(--color-primary)',
               }}
             >
-              <Plus size={14} /> Nouvelle demande
+              <Plus size={14} /> {language === 'ar' ? 'طلب جديد' : 'Nouvelle demande'}
             </Link>
             <Link
               to="/user/requests"
@@ -352,7 +354,7 @@ export default function UserDashboard() {
                 gap: '4px',
               }}
             >
-              Suivre mes demandes <ArrowRight size={14} />
+              {language === 'ar' ? 'متابعة الطلبات' : 'Suivre mes demandes'} <ArrowRight size={14} />
             </Link>
           </div>
         </div>
@@ -371,25 +373,35 @@ export default function UserDashboard() {
                         {req.medicine?.name}
                       </h4>
                       <span style={{ fontSize: 'var(--font-size-xs)', color: 'var(--color-text-secondary)' }}>
-                        {req.medicine?.dosage} • {req.medicine?.form} (Qté : {req.quantity})
+                        {req.medicine?.dosage} • {req.medicine?.form} ({language === 'ar' ? 'الكمية' : 'Qté'} : {req.quantity})
                       </span>
                     </div>
                     {req.status === 'confirmed' ? (
-                      <Badge variant="success" dot size="sm">Prête pour retrait</Badge>
+                      <Badge variant="success" dot size="sm">
+                        {language === 'ar' ? 'جاهز للاستلام' : 'Prête pour retrait'}
+                      </Badge>
                     ) : req.status === 'pending_pharmacy' ? (
-                      <Badge variant="info" dot size="sm">En attente pharmacie</Badge>
+                      <Badge variant="info" dot size="sm">
+                        {language === 'ar' ? 'بانتظار الصيدلية' : 'En attente pharmacie'}
+                      </Badge>
                     ) : req.status === 'pending_verification' ? (
-                      <Badge variant="warning" dot size="sm">En vérification</Badge>
+                      <Badge variant="warning" dot size="sm">
+                        {language === 'ar' ? 'قيد المراجعة' : 'En vérification'}
+                      </Badge>
                     ) : req.status === 'completed' ? (
-                      <Badge variant="neutral" size="sm">Retiré</Badge>
+                      <Badge variant="neutral" size="sm">
+                        {language === 'ar' ? 'تم الاستلام' : 'Retiré'}
+                      </Badge>
                     ) : (
-                      <Badge variant="danger" size="sm">Refusé</Badge>
+                      <Badge variant="danger" size="sm">
+                        {language === 'ar' ? 'مرفوض' : 'Refusé'}
+                      </Badge>
                     )}
                   </div>
 
                   <div style={{ fontSize: 'var(--font-size-xs)', color: 'var(--color-text-secondary)', borderTop: '1px solid var(--color-border-subtle)', paddingTop: '8px' }}>
-                    <div><strong>Pharmacie :</strong> {req.pharmacy?.name} ({req.pharmacy?.city})</div>
-                    <div><strong>Bénéficiaire au comptoir :</strong> {req.beneficiary?.name} ({req.beneficiary?.phone})</div>
+                    <div><strong>{language === 'ar' ? 'الصيدلية :' : 'Pharmacie :'}</strong> {req.pharmacy?.name} ({req.pharmacy?.city})</div>
+                    <div><strong>{language === 'ar' ? 'المستلم في الشباك :' : 'Bénéficiaire au comptoir :'}</strong> {req.beneficiary?.name} ({req.beneficiary?.phone})</div>
                   </div>
                 </div>
               </Card>
@@ -406,7 +418,7 @@ export default function UserDashboard() {
               fontSize: 'var(--font-size-sm)',
             }}
           >
-            Aucune demande de médicament enregistrée pour l'instant.
+            {language === 'ar' ? 'لا توجد طلبات أدوية مسجلة حتى الآن.' : "Aucune demande de médicament enregistrée pour l'instant."}
           </div>
         )}
       </div>
@@ -426,7 +438,7 @@ export default function UserDashboard() {
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
             <Bell size={18} color="var(--color-primary)" />
             <h2 style={{ fontSize: 'var(--font-size-lg)', margin: 0 }}>
-              Derniers changements de disponibilité
+              {language === 'ar' ? 'آخر تغييرات توفر الأدوية' : 'Derniers changements de disponibilité'}
             </h2>
           </div>
           <Link
@@ -439,7 +451,7 @@ export default function UserDashboard() {
               gap: '4px',
             }}
           >
-            Voir tout l'historique <ArrowRight size={14} />
+            {language === 'ar' ? 'عرض السجل كاملاً' : "Voir tout l'historique"} <ArrowRight size={14} />
           </Link>
         </div>
 

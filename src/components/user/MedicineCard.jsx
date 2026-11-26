@@ -1,10 +1,11 @@
 import React from 'react';
-import { Pill, Heart, Building2, Eye, ShieldCheck, AlertCircle } from 'lucide-react';
+import { Heart, Building2, Eye } from 'lucide-react';
 import Card from '../common/Card';
 import Badge from '../common/Badge';
 import Button from '../common/Button';
 import { useUserStore } from '../../hooks/useUserStore';
 import { useToast } from '../../hooks/useToast';
+import { useLanguage } from '../../context/LanguageContext';
 
 /**
  * Carte de présentation standardisée d'un médicament avec bouton Voir les pharmacies et Favoris
@@ -12,6 +13,7 @@ import { useToast } from '../../hooks/useToast';
 export default function MedicineCard({ medicine, onViewPharmacies }) {
   const { isFavorite, toggleFavorite, addRecentView } = useUserStore();
   const toast = useToast();
+  const { language, isRtl, t } = useLanguage();
 
   const favorite = isFavorite(medicine.id);
 
@@ -19,9 +21,15 @@ export default function MedicineCard({ medicine, onViewPharmacies }) {
     e.stopPropagation();
     toggleFavorite(medicine);
     if (!favorite) {
-      toast.success(`${medicine.name} ajouté aux favoris`, 'Favoris');
+      toast.success(
+        language === 'ar' ? `تمت إضافة ${medicine.name} إلى المفضلة` : `${medicine.name} ajouté aux favoris`,
+        language === 'ar' ? 'المفضلة' : 'Favoris'
+      );
     } else {
-      toast.info(`${medicine.name} retiré des favoris`, 'Favoris');
+      toast.info(
+        language === 'ar' ? `تم حذف ${medicine.name} من المفضلة` : `${medicine.name} retiré des favoris`,
+        language === 'ar' ? 'المفضلة' : 'Favoris'
+      );
     }
   };
 
@@ -35,15 +43,15 @@ export default function MedicineCard({ medicine, onViewPharmacies }) {
   const availabilityConfig = {
     available: {
       variant: 'success',
-      label: 'Disponible',
+      label: t('status.available'),
     },
     'low-stock': {
       variant: 'warning',
-      label: 'Stock faible',
+      label: t('status.lowStock'),
     },
     'out-of-stock': {
       variant: 'danger',
-      label: 'Rupture',
+      label: t('status.outOfStock'),
     },
   };
 
@@ -57,7 +65,7 @@ export default function MedicineCard({ medicine, onViewPharmacies }) {
         <button
           type="button"
           onClick={handleToggleFavorite}
-          aria-label={favorite ? 'Retirer des favoris' : 'Ajouter aux favoris'}
+          aria-label={favorite ? t('medicine.removeFav') : t('medicine.addFav')}
           style={{
             padding: '6px',
             borderRadius: 'var(--radius-full)',
@@ -70,7 +78,7 @@ export default function MedicineCard({ medicine, onViewPharmacies }) {
             justifyContent: 'center',
             transition: 'all var(--transition-fast)',
           }}
-          title={favorite ? 'Retirer des favoris' : 'Ajouter aux favoris'}
+          title={favorite ? t('medicine.removeFav') : t('medicine.addFav')}
         >
           <Heart size={18} fill={favorite ? '#EF4444' : 'transparent'} strokeWidth={2.2} />
         </button>
@@ -87,12 +95,13 @@ export default function MedicineCard({ medicine, onViewPharmacies }) {
           <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: 'var(--font-size-xs)' }}>
             <Building2 size={15} color="var(--color-primary)" />
             <span style={{ fontWeight: '600', color: 'var(--color-text-primary)' }}>
-              {medicine.pharmaciesCount} {medicine.pharmaciesCount > 1 ? 'pharmacies' : 'pharmacie'}
+              {medicine.pharmaciesCount}{' '}
+              {medicine.pharmaciesCount > 1 ? t('medicine.pharmaciesCount') : t('medicine.pharmacyCount')}
             </span>
           </div>
 
           <Button variant="primary" size="sm" icon={Eye} onClick={handleView}>
-            Voir les pharmacies
+            {t('medicine.viewPharmacies')}
           </Button>
         </div>
       }
@@ -132,7 +141,7 @@ export default function MedicineCard({ medicine, onViewPharmacies }) {
                 margin: '2px 0 0',
               }}
             >
-              DCI : <strong>{medicine.dci}</strong>
+              {t('medicine.dci')} <strong>{medicine.dci}</strong>
             </p>
           </div>
 
@@ -152,10 +161,10 @@ export default function MedicineCard({ medicine, onViewPharmacies }) {
           }}
         >
           <div>
-            Forme : <strong>{medicine.form}</strong>
+            {t('medicine.form')} <strong>{medicine.form}</strong>
           </div>
           <div>
-            Classe : <span>{medicine.category}</span>
+            {t('medicine.class')} <span>{medicine.category}</span>
           </div>
         </div>
 
@@ -174,7 +183,7 @@ export default function MedicineCard({ medicine, onViewPharmacies }) {
             {medicine.price}
           </span>
           <span style={{ color: 'var(--color-text-muted)' }}>
-            {medicine.prescriptionRequired ? 'Sur ordonnance' : 'Sans ordonnance'}
+            {medicine.prescriptionRequired ? t('medicine.prescription') : t('medicine.noPrescription')}
           </span>
         </div>
       </div>

@@ -27,10 +27,12 @@ import EmptyState from '../../components/common/EmptyState';
 import Modal from '../../components/common/Modal';
 import { useUserStore } from '../../hooks/useUserStore';
 import { useToast } from '../../hooks/useToast';
+import { useLanguage } from '../../context/LanguageContext';
 
 export default function RequestsTrackingPage() {
   const navigate = useNavigate();
   const toast = useToast();
+  const { language, isRtl, t } = useLanguage();
   const { requests } = useUserStore();
 
   const [activeTab, setActiveTab] = useState('all');
@@ -57,15 +59,35 @@ export default function RequestsTrackingPage() {
   const getStatusBadge = (status) => {
     switch (status) {
       case 'pending_verification':
-        return <Badge variant="warning" dot>En attente de vérification</Badge>;
+        return (
+          <Badge variant="warning" dot>
+            {language === 'ar' ? 'بانتظار التحقق' : 'En attente de vérification'}
+          </Badge>
+        );
       case 'pending_pharmacy':
-        return <Badge variant="info" dot>En attente confirmation pharmacie</Badge>;
+        return (
+          <Badge variant="info" dot>
+            {language === 'ar' ? 'بانتظار تأكيد الصيدلية' : 'En attente confirmation pharmacie'}
+          </Badge>
+        );
       case 'confirmed':
-        return <Badge variant="success" dot>Confirmée (Prête pour retrait)</Badge>;
+        return (
+          <Badge variant="success" dot>
+            {language === 'ar' ? 'مؤكدة (جاهزة للاستلام)' : 'Confirmée (Prête pour retrait)'}
+          </Badge>
+        );
       case 'rejected':
-        return <Badge variant="danger" dot>Refusée</Badge>;
+        return (
+          <Badge variant="danger" dot>
+            {language === 'ar' ? 'مرفوضة' : 'Refusée'}
+          </Badge>
+        );
       case 'completed':
-        return <Badge variant="neutral">Terminée (Retirée)</Badge>;
+        return (
+          <Badge variant="neutral">
+            {language === 'ar' ? 'مكتملة (تم الاستلام)' : 'Terminée (Retirée)'}
+          </Badge>
+        );
       default:
         return <Badge variant="primary">{status}</Badge>;
     }
@@ -92,20 +114,20 @@ export default function RequestsTrackingPage() {
         <div>
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '4px' }}>
             <h1 style={{ fontSize: 'var(--font-size-2xl)', margin: 0 }}>
-              Suivi de mes Demandes de Médicaments
+              {t('requests.title')}
             </h1>
             <Badge variant="primary" size="sm">
-              {requests.length} demande(s)
+              {requests.length} {t('requests.badge')}
             </Badge>
           </div>
           <p style={{ color: 'var(--color-text-secondary)', fontSize: 'var(--font-size-sm)', margin: 0 }}>
-            Consultez le statut des mises à disposition de médicaments en temps réel dans les officines.
+            {t('requests.subtitle')}
           </p>
         </div>
 
         <Link to="/user/request" style={{ textDecoration: 'none' }}>
           <Button variant="primary" icon={Plus}>
-            Nouvelle demande
+            {t('requests.newBtn')}
           </Button>
         </Link>
       </div>
@@ -126,9 +148,8 @@ export default function RequestsTrackingPage() {
       >
         <Building2 size={18} color="#1D4ED8" style={{ flexShrink: 0 }} />
         <span>
-          <strong>Retrait physique obligatoire au comptoir :</strong> Le bénéficiaire désigné doit
-          récupérer personnellement les médicaments à la pharmacie partenaire muni d'une pièce d'identité
-          et de l'ordonnance originale. <strong>Aucune livraison à domicile n'est proposée.</strong>
+          <strong>{language === 'ar' ? 'الاستلام شخصي وإلزامي من شباك الصيدلية :' : 'Retrait physique obligatoire au comptoir :'}</strong>{' '}
+          {t('legal.disclaimer')}
         </span>
       </div>
 
@@ -145,25 +166,25 @@ export default function RequestsTrackingPage() {
         }}
       >
         {[
-          { id: 'all', label: 'Toutes les demandes', count: requests.length },
+          { id: 'all', label: language === 'ar' ? 'جميع الطلبات' : 'Toutes les demandes', count: requests.length },
           {
             id: 'pending',
-            label: 'En attente',
+            label: language === 'ar' ? 'قيد الانتظار' : 'En attente',
             count: requests.filter((r) => r.status === 'pending_verification' || r.status === 'pending_pharmacy').length,
           },
           {
             id: 'confirmed',
-            label: 'Confirmées (À retirer)',
+            label: language === 'ar' ? 'مؤكدة (جاهزة)' : 'Confirmées (À retirer)',
             count: requests.filter((r) => r.status === 'confirmed').length,
           },
           {
             id: 'completed',
-            label: 'Terminées',
+            label: language === 'ar' ? 'مكتملة' : 'Terminées',
             count: requests.filter((r) => r.status === 'completed').length,
           },
           {
             id: 'rejected',
-            label: 'Refusées',
+            label: language === 'ar' ? 'مرفوضة' : 'Refusées',
             count: requests.filter((r) => r.status === 'rejected').length,
           },
         ].map((tab) => (
@@ -462,7 +483,7 @@ export default function RequestsTrackingPage() {
                     icon={PhoneCall}
                     onClick={(e) => handleCall(req.pharmacy?.phone, req.pharmacy?.name, e)}
                   >
-                    Appeler l'officine
+                    {t('medicine.callPharmacy')}
                   </Button>
 
                   <Button
@@ -473,7 +494,7 @@ export default function RequestsTrackingPage() {
                       setIsModalOpen(true);
                     }}
                   >
-                    Détails complets
+                    {language === 'ar' ? 'التفاصيل الكاملة' : 'Détails complets'}
                   </Button>
                 </div>
               </div>
@@ -483,16 +504,18 @@ export default function RequestsTrackingPage() {
       ) : (
         <EmptyState
           icon={FileText}
-          title="Aucune demande trouvée"
+          title={t('requests.emptyTitle')}
           description={
             activeTab === 'all'
-              ? 'Vous n’avez encore transmis aucune demande de médicament.'
+              ? t('requests.emptyDesc')
+              : language === 'ar'
+              ? 'لا توجد طلبات تطابق هذا التصنيف.'
               : 'Aucune demande ne correspond à ce filtre.'
           }
           action={
             <Link to="/user/request" style={{ textDecoration: 'none' }}>
               <Button variant="primary" icon={Plus}>
-                Faire une demande de médicament
+                {t('requests.newBtn')}
               </Button>
             </Link>
           }
@@ -504,11 +527,11 @@ export default function RequestsTrackingPage() {
         <Modal
           isOpen={isModalOpen}
           onClose={() => setIsModalOpen(false)}
-          title={`Détails de la demande ${selectedRequest.id}`}
-          description={`Transmise le ${selectedRequest.createdAt}`}
+          title={language === 'ar' ? `تفاصيل الطلب ${selectedRequest.id}` : `Détails de la demande ${selectedRequest.id}`}
+          description={language === 'ar' ? `بتاريخ ${selectedRequest.createdAt}` : `Transmise le ${selectedRequest.createdAt}`}
           footer={
             <Button variant="primary" onClick={() => setIsModalOpen(false)}>
-              Fermer
+              {t('medicine.close')}
             </Button>
           }
         >

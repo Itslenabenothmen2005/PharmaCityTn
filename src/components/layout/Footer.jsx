@@ -1,12 +1,14 @@
-import React from 'react';
 import { Link } from 'react-router-dom';
-import { PhoneCall, Shield, HeartHandshake, MapPin } from 'lucide-react';
+import { Shield } from 'lucide-react';
 import Logo from '../common/Logo';
+import { useLanguage } from '../../context/LanguageContext';
 
 /**
  * Composant Footer Réutilisable PharmaCityTN
  */
 export default function Footer() {
+  const { language, isRtl, t } = useLanguage();
+
   return (
     <footer
       style={{
@@ -35,9 +37,7 @@ export default function Footer() {
                 lineHeight: 'var(--line-height-relaxed)',
               }}
             >
-              Première plateforme numérique tunisienne dédiée à la localisation et à la
-              vérification de disponibilité des médicaments en temps réel dans les officines
-              partenaires.
+              {t('footer.desc')}
             </p>
             <div
               style={{
@@ -54,7 +54,7 @@ export default function Footer() {
               }}
             >
               <Shield size={14} />
-              Données certifiées & sécurisées
+              {t('footer.security')}
             </div>
           </div>
 
@@ -70,27 +70,27 @@ export default function Footer() {
                 marginBottom: 'var(--spacing-md)',
               }}
             >
-              Services Citoyens
+              {t('footer.servicesTitle')}
             </h4>
             <ul style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
               <li>
                 <Link to="/user/search" style={footerLinkStyle}>
-                  🔍 Rechercher un médicament
+                  {t('footer.search')}
                 </Link>
               </li>
               <li>
                 <Link to="/user/search" style={footerLinkStyle}>
-                  🌙 Pharmacies de garde (Tunis, Sousse, Sfax...)
+                  {t('footer.duty')}
                 </Link>
               </li>
               <li>
                 <Link to="/user/favorites" style={footerLinkStyle}>
-                  ⭐ Mes pharmacies favorites
+                  {t('footer.fav')}
                 </Link>
               </li>
               <li>
                 <Link to="/user/notifications" style={footerLinkStyle}>
-                  🔔 Alertes disponibilité en stock
+                  {t('footer.notif')}
                 </Link>
               </li>
             </ul>
@@ -108,27 +108,27 @@ export default function Footer() {
                 marginBottom: 'var(--spacing-md)',
               }}
             >
-              Espace Professionnels
+              {t('footer.pharmaTitle')}
             </h4>
             <ul style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
               <li>
                 <Link to="/pharmacy/dashboard" style={footerLinkStyle}>
-                  🏥 Portail Officine
+                  🏥 {t('footer.dashboard')}
                 </Link>
               </li>
               <li>
                 <Link to="/pharmacy/medicines" style={footerLinkStyle}>
-                  💊 Catalogue des médicaments
+                  💊 {language === 'ar' ? 'دليل الأدوية' : 'Catalogue des médicaments'}
                 </Link>
               </li>
               <li>
                 <Link to="/pharmacy/stock" style={footerLinkStyle}>
-                  📦 Gestion et mise à jour du stock
+                  📦 {t('footer.stock')}
                 </Link>
               </li>
               <li>
-                <Link to="/register" style={footerLinkStyle}>
-                  ✨ Inscrire une nouvelle pharmacie
+                <Link to="/pharmacy/history" style={footerLinkStyle}>
+                  📜 {t('footer.history')}
                 </Link>
               </li>
             </ul>
@@ -146,7 +146,7 @@ export default function Footer() {
                 marginBottom: 'var(--spacing-md)',
               }}
             >
-              Urgences Tunisie
+              {language === 'ar' ? 'طوارئ تونس' : 'Urgences Tunisie'}
             </h4>
             <div
               style={{
@@ -157,19 +157,19 @@ export default function Footer() {
               }}
             >
               <div style={emergencyItemStyle}>
-                <span>🚑 SAMU Tunisie</span>
+                <span>{language === 'ar' ? '🚑 الإسعاف الطبي (SAMU)' : '🚑 SAMU Tunisie'}</span>
                 <strong>190</strong>
               </div>
               <div style={emergencyItemStyle}>
-                <span>🚒 Protection Civile</span>
+                <span>{language === 'ar' ? '🚒 الحماية المدنية' : '🚒 Protection Civile'}</span>
                 <strong>198</strong>
               </div>
               <div style={emergencyItemStyle}>
-                <span>🧪 Centre Anti-Poisons</span>
+                <span>{language === 'ar' ? '🧪 مركز مكافحة التسمم' : '🧪 Centre Anti-Poisons'}</span>
                 <strong>71 335 500</strong>
               </div>
               <div style={emergencyItemStyle}>
-                <span>👮 Police Secours</span>
+                <span>{language === 'ar' ? '👮 شرطة النجدة' : '👮 Police Secours'}</span>
                 <strong>197</strong>
               </div>
             </div>
@@ -198,12 +198,12 @@ export default function Footer() {
           }}
         >
           <div>
-            © 2026 <strong>PharmaCityTN</strong>. Tous droits réservés. Développé pour la santé publique en Tunisie.
+            {t('footer.copyright')}
           </div>
           <div style={{ display: 'flex', gap: '16px' }}>
-            <span>Confidentialité</span>
-            <span>Conditions d'utilisation</span>
-            <span>Mentions légales</span>
+            <span>{language === 'ar' ? 'السرية والخصوصية' : 'Confidentialité'}</span>
+            <span>{language === 'ar' ? 'شروط الاستخدام' : "Conditions d'utilisation"}</span>
+            <span>{language === 'ar' ? 'إشعار قانوني' : 'Mentions légales'}</span>
           </div>
         </div>
       </div>

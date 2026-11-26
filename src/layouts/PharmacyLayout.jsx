@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Outlet, Link, useLocation } from 'react-router-dom';
+import { Outlet, Link, useLocation, useNavigate } from 'react-router-dom';
 import {
   LayoutDashboard,
   Pill,
@@ -21,20 +21,30 @@ import Footer from '../components/layout/Footer';
 import Badge from '../components/common/Badge';
 import { pharmacyProfile } from '../data/pharmacyStock';
 import { PharmacyProvider, usePharmacyStore } from '../hooks/usePharmacyStore';
-
-const pharmacyLinks = [
-  { to: '/pharmacy/dashboard', label: 'Tableau de bord', icon: LayoutDashboard },
-  { to: '/pharmacy/medicines', label: 'Médicaments', icon: Pill },
-  { to: '/pharmacy/stock', label: 'Gestion du stock', icon: Package, showStockBadge: true },
-  { to: '/pharmacy/availability', label: 'Disponibilités', icon: ClipboardCheck },
-  { to: '/pharmacy/history', label: 'Historique', icon: History, showHistoryBadge: true },
-  { to: '/pharmacy/profile', label: 'Profil pharmacie', icon: Store },
-];
+import { useLanguage } from '../context/LanguageContext';
+import { useToast } from '../hooks/useToast';
 
 function PharmacyLayoutContent() {
   const location = useLocation();
+  const navigate = useNavigate();
+  const toast = useToast();
+  const { language, isRtl, t } = useLanguage();
   const [mobileOpen, setMobileOpen] = useState(false);
   const { stats } = usePharmacyStore();
+
+  const handleLogout = () => {
+    toast.info(t('nav.logoutConfirm'), 'Déconnexion');
+    navigate('/');
+  };
+
+  const pharmacyLinks = [
+    { to: '/pharmacy/dashboard', label: t('nav.pharma.dashboard'), icon: LayoutDashboard },
+    { to: '/pharmacy/medicines', label: t('nav.pharma.medicines'), icon: Pill },
+    { to: '/pharmacy/stock', label: t('nav.pharma.stock'), icon: Package, showStockBadge: true },
+    { to: '/pharmacy/availability', label: t('nav.pharma.availability'), icon: ClipboardCheck },
+    { to: '/pharmacy/history', label: t('nav.pharma.history'), icon: History, showHistoryBadge: true },
+    { to: '/pharmacy/profile', label: t('nav.pharma.profile'), icon: Store },
+  ];
 
   const statusColor = {
     open: '#168B70',
@@ -81,7 +91,7 @@ function PharmacyLayoutContent() {
           </div>
           <div>
             <div style={{ fontSize: '12px', fontWeight: 'bold', color: '#fff' }}>{pharmacyProfile.name}</div>
-            <div style={{ fontSize: '10px', color: 'rgba(255,255,255,0.65)' }}>Espace Professionnel</div>
+            <div style={{ fontSize: '10px', color: 'rgba(255,255,255,0.65)' }}>{t('topbar.pharmacyMode')}</div>
           </div>
         </div>
         <button
@@ -102,7 +112,7 @@ function PharmacyLayoutContent() {
           }}
         >
           {mobileOpen ? <X size={16} /> : <Menu size={16} />}
-          Menu
+          {language === 'ar' ? 'القائمة' : 'Menu'}
         </button>
       </div>
 
@@ -303,32 +313,34 @@ function PharmacyLayoutContent() {
                     {pharmacyProfile.titular}
                   </div>
                   <div style={{ fontSize: '11px', color: 'rgba(255,255,255,0.5)' }}>
-                    Pharmacien Titulaire
+                    {language === 'ar' ? 'صيدلي مسؤول' : 'Pharmacien Titulaire'}
                   </div>
                 </div>
               </div>
 
               <div style={{ display: 'flex', gap: '8px' }}>
-                <Link
-                  to="/"
+                <button
+                  type="button"
+                  onClick={handleLogout}
                   style={{
                     flex: 1,
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'center',
                     gap: '5px',
-                    padding: '7px 10px',
+                    padding: '8px 10px',
                     borderRadius: '8px',
-                    backgroundColor: 'rgba(255,255,255,0.08)',
-                    border: '1px solid rgba(255,255,255,0.1)',
-                    color: 'rgba(255,255,255,0.7)',
+                    backgroundColor: 'rgba(239, 68, 68, 0.15)',
+                    border: '1px solid rgba(239, 68, 68, 0.3)',
+                    color: '#FCA5A5',
                     fontSize: '11px',
-                    textDecoration: 'none',
+                    fontWeight: '600',
+                    cursor: 'pointer',
                   }}
                 >
-                  <ArrowLeft size={13} />
-                  Portail Public
-                </Link>
+                  <LogOut size={13} />
+                  <span>{t('nav.backToPublic')}</span>
+                </button>
               </div>
             </div>
 

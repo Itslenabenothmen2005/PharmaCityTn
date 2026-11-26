@@ -10,7 +10,6 @@ import {
   Sparkles,
   ArrowRight,
   ShieldCheck,
-  CheckCircle2,
 } from 'lucide-react';
 import Card from '../../components/common/Card';
 import Input from '../../components/common/Input';

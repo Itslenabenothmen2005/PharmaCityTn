@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Outlet, Link, useLocation } from 'react-router-dom';
+import { Outlet, Link, useLocation, useNavigate } from 'react-router-dom';
 import {
   LayoutDashboard,
   Search,
@@ -12,27 +12,23 @@ import {
   ShieldCheck,
   FilePlus2,
   ClipboardList,
+  LogOut,
 } from 'lucide-react';
 import Header from '../components/layout/Header';
 import Footer from '../components/layout/Footer';
 import Badge from '../components/common/Badge';
 import { useUserStore } from '../hooks/useUserStore';
-
-const userLinks = [
-  { to: '/user/dashboard', label: 'Tableau de bord', icon: LayoutDashboard },
-  { to: '/user/search', label: 'Recherche médicaments', icon: Search },
-  { to: '/user/request', label: 'Demander un médicament', icon: FilePlus2 },
-  { to: '/user/requests', label: 'Suivi des demandes', icon: ClipboardList, showRequestsCount: true },
-  { to: '/user/favorites', label: 'Médicaments favoris', icon: Heart, showFavCount: true },
-  { to: '/user/notifications', label: 'Alertes & Notifications', icon: Bell, showNotifCount: true },
-  { to: '/user/profile', label: 'Mon Profil', icon: User },
-];
+import { useLanguage } from '../context/LanguageContext';
+import { useToast } from '../hooks/useToast';
 
 /**
- * Layout Espace Citoyen / Utilisateur PharmaCityTN avec navigation responsive
+ * Layout Espace Citoyen / Utilisateur PharmaCityTN avec navigation responsive et bilingue
  */
 export default function UserLayout() {
   const location = useLocation();
+  const navigate = useNavigate();
+  const toast = useToast();
+  const { language, isRtl, t } = useLanguage();
   const { profile, favoriteIds, unreadCount, requests } = useUserStore();
   const [mobileDrawerOpen, setMobileDrawerOpen] = useState(false);
 
@@ -40,6 +36,21 @@ export default function UserLayout() {
   const activeRequestsCount = requests?.filter(
     (r) => r.status === 'pending_verification' || r.status === 'pending_pharmacy' || r.status === 'confirmed'
   ).length || 0;
+
+  const handleLogout = () => {
+    toast.info(t('nav.logoutConfirm'), 'Déconnexion');
+    navigate('/');
+  };
+
+  const userLinks = [
+    { to: '/user/dashboard', label: t('nav.dashboard'), icon: LayoutDashboard },
+    { to: '/user/search', label: t('nav.searchMed'), icon: Search },
+    { to: '/user/request', label: t('nav.request'), icon: FilePlus2 },
+    { to: '/user/requests', label: t('nav.requestsTracking'), icon: ClipboardList, showRequestsCount: true },
+    { to: '/user/favorites', label: t('nav.favorites'), icon: Heart, showFavCount: true },
+    { to: '/user/notifications', label: t('nav.notifications'), icon: Bell, showNotifCount: true },
+    { to: '/user/profile', label: t('nav.profile'), icon: User },
+  ];
 
   return (
     <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', backgroundColor: 'var(--color-bg)' }}>
@@ -78,7 +89,7 @@ export default function UserLayout() {
             <div style={{ fontSize: '13px', fontWeight: 'bold', color: 'var(--color-text-primary)' }}>
               {profile.name}
             </div>
-            <div style={{ fontSize: '11px', color: 'var(--color-text-secondary)' }}>Espace Citoyen</div>
+            <div style={{ fontSize: '11px', color: 'var(--color-text-secondary)' }}>{t('topbar.citizenMode')}</div>
           </div>
         </div>
 
@@ -100,7 +111,7 @@ export default function UserLayout() {
           }}
         >
           {mobileDrawerOpen ? <X size={16} /> : <Menu size={16} />}
-          <span>Menu Espace</span>
+          <span>{language === 'ar' ? 'القائمة' : 'Menu Espace'}</span>
         </button>
       </div>
 
@@ -171,7 +182,7 @@ export default function UserLayout() {
                 </h4>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '4px', marginTop: '2px' }}>
                   <Badge variant="primary" size="sm">
-                    {profile.city || 'Citoyen'}
+                    {profile.city || (language === 'ar' ? 'مواطن' : 'Citoyen')}
                   </Badge>
                 </div>
               </div>
@@ -198,7 +209,7 @@ export default function UserLayout() {
                         : 'var(--font-weight-medium)',
                       color: active ? 'var(--color-primary-dark)' : 'var(--color-text-secondary)',
                       backgroundColor: active ? 'var(--color-primary-light)' : 'transparent',
-                      borderLeft: active
+                      borderInlineStart: active
                         ? '3px solid var(--color-primary)'
                         : '3px solid transparent',
                       transition: 'all var(--transition-fast)',
@@ -273,12 +284,12 @@ export default function UserLayout() {
             >
               <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '4px', color: 'var(--color-text-secondary)' }}>
                 <ShieldCheck size={14} color="var(--color-primary)" />
-                <strong>Réseau PharmaCityTN</strong>
+                <strong>PharmaCityTN</strong>
               </div>
-              Retrait personnel obligatoire au comptoir. Aucune livraison à domicile.
+              {t('legal.disclaimer')}
             </div>
 
-            {/* Lien retour portail public */}
+            {/* Bouton de Déconnexion / Retour portail public */}
             <div
               style={{
                 marginTop: 'var(--spacing-md)',
@@ -286,21 +297,28 @@ export default function UserLayout() {
                 borderTop: '1px solid var(--color-border-subtle)',
               }}
             >
-              <Link
-                to="/"
+              <button
+                type="button"
+                onClick={handleLogout}
                 style={{
+                  width: '100%',
                   display: 'flex',
                   alignItems: 'center',
                   gap: '8px',
                   fontSize: 'var(--font-size-xs)',
-                  color: 'var(--color-text-muted)',
-                  textDecoration: 'none',
-                  padding: '6px 10px',
+                  color: '#DC2626',
+                  backgroundColor: '#FEF2F2',
+                  border: '1px solid #FECACA',
+                  borderRadius: 'var(--radius-md)',
+                  padding: '8px 12px',
+                  cursor: 'pointer',
+                  fontWeight: '600',
+                  transition: 'all var(--transition-fast)',
                 }}
               >
-                <ArrowLeft size={14} />
-                Retour au portail public
-              </Link>
+                <LogOut size={14} />
+                <span>{t('nav.backToPublic')}</span>
+              </button>
             </div>
           </aside>
 

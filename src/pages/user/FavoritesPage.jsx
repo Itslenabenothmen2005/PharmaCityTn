@@ -1,14 +1,16 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { Heart, Search, Pill, ArrowRight, Info } from 'lucide-react';
+import { Heart, Search, Info } from 'lucide-react';
 import Badge from '../../components/common/Badge';
 import Button from '../../components/common/Button';
 import EmptyState from '../../components/common/EmptyState';
 import MedicineCard from '../../components/user/MedicineCard';
 import MedicineDetailsModal from '../../components/user/MedicineDetailsModal';
 import { useUserStore } from '../../hooks/useUserStore';
+import { useLanguage } from '../../context/LanguageContext';
 
 export default function FavoritesPage() {
+  const { language, isRtl, t } = useLanguage();
   const { favoriteMedicines } = useUserStore();
   const [filterText, setFilterText] = useState('');
   const [selectedMedicine, setSelectedMedicine] = useState(null);
@@ -43,19 +45,19 @@ export default function FavoritesPage() {
       >
         <div>
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '4px' }}>
-            <h1 style={{ fontSize: 'var(--font-size-2xl)', margin: 0 }}>Mes Médicaments Favoris</h1>
+            <h1 style={{ fontSize: 'var(--font-size-2xl)', margin: 0 }}>{t('favorites.title')}</h1>
             <Badge variant="primary" size="sm">
-              {favoriteMedicines.length} enregistrés
+              {favoriteMedicines.length} {t('favorites.badge')}
             </Badge>
           </div>
           <p style={{ color: 'var(--color-text-secondary)', fontSize: 'var(--font-size-sm)', margin: 0 }}>
-            Retrouvez rapidement les médicaments que vous suivez et vérifiez la disponibilité déclarée en pharmacie.
+            {t('favorites.subtitle')}
           </p>
         </div>
 
         <Link to="/user/search" style={{ textDecoration: 'none' }}>
           <Button variant="secondary" icon={Search}>
-            Ajouter un médicament
+            {t('favorites.addBtn')}
           </Button>
         </Link>
       </div>
@@ -76,8 +78,7 @@ export default function FavoritesPage() {
       >
         <Info size={16} color="var(--color-primary)" style={{ flexShrink: 0 }} />
         <span>
-          Les disponibilités affichées sont déclaratives et ne garantissent pas la délivrance.
-          Contactez l'officine pour confirmer la disponibilité avant tout déplacement.
+          <strong>{language === 'ar' ? 'تذكير :' : 'Rappel :'}</strong> {t('legal.disclaimer')}
         </span>
       </div>
 
@@ -94,10 +95,10 @@ export default function FavoritesPage() {
             maxWidth: '380px',
           }}
         >
-          <Search size={16} color="var(--color-text-muted)" style={{ marginRight: '8px' }} />
+          <Search size={16} color="var(--color-text-muted)" style={{ marginRight: '8px', marginLeft: '8px' }} />
           <input
             type="text"
-            placeholder="Filtrer dans mes favoris..."
+            placeholder={t('favorites.filterPlaceholder')}
             value={filterText}
             onChange={(e) => setFilterText(e.target.value)}
             style={{
@@ -127,12 +128,12 @@ export default function FavoritesPage() {
       ) : favoriteMedicines.length === 0 ? (
         <EmptyState
           icon={Heart}
-          title="Vous n'avez aucun médicament en favoris"
-          description="Enregistrez vos traitements fréquents ou réguliers pour surveiller instantanément les stocks des officines proches de chez vous."
+          title={t('favorites.emptyTitle')}
+          description={t('favorites.emptyDesc')}
           action={
             <Link to="/user/search" style={{ textDecoration: 'none' }}>
               <Button variant="primary" icon={Search}>
-                Rechercher et ajouter un médicament
+                {t('favorites.addBtn')}
               </Button>
             </Link>
           }
@@ -140,11 +141,11 @@ export default function FavoritesPage() {
       ) : (
         <EmptyState
           icon={Search}
-          title="Aucun favori ne correspond à votre filtre"
-          description={`Aucun médicament enregistré ne contient « ${filterText} ».`}
+          title={language === 'ar' ? 'لا يوجد دواء يطابق التصفية' : "Aucun favori ne correspond à votre filtre"}
+          description={language === 'ar' ? `لا توجد أدوية مسجلة تحتوي على « ${filterText} ».` : `Aucun médicament enregistré ne contient « ${filterText} ».`}
           action={
             <Button variant="secondary" onClick={() => setFilterText('')}>
-              Effacer le filtre
+              {language === 'ar' ? 'مسح التصفية' : 'Effacer le filtre'}
             </Button>
           }
         />

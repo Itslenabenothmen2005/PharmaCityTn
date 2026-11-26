@@ -1,8 +1,5 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import {
-  Package,
-  Plus,
-  Minus,
   AlertTriangle,
   CheckCircle2,
   XCircle,
@@ -11,7 +8,6 @@ import {
   FileCheck2,
   Trash2,
   ArrowRight,
-  Info,
 } from 'lucide-react';
 import Modal from '../common/Modal';
 import Button from '../common/Button';
